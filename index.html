@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text to Create Submission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stage-w: 1612px;
+    --stage-h: 847px;
+    --blue: #0071b5;
+    --mint: #deefea;
+    --green: #56a27b;
+    --ink: #1e1e1e;
+    --gray-text: #404040;
+    --border: #e5e5e5;
+    --app-bg: #efeeee;
+    --app-ink: #222222;
+    --app-value: #212529;
+    --app-label: #9a9a9a;
+    --app-divider: #eeeeee;
+    --error: #c62828;
+    --app-link: #045a90;
+    --transition: 300ms cubic-bezier(0, 0, 0.58, 1); /* Figma "Ease out" */
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #2c2c2c;
+    overflow: hidden;
+  }
+
+  /* Fixed-size canvas scaled to fit the window, like Figma's "Fit" prototype scaling */
+  .stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--stage-w);
+    height: var(--stage-h);
+    transform-origin: center center;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition), visibility 0s linear 300ms;
+  }
+  .screen.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--transition), visibility 0s;
+    z-index: 1;
+  }
+
+  .layer { position: absolute; }
+  .bg {
+    left: 0; top: 0;
+    width: 1611px; height: 846px;
+    background: url("assets/dashboard.png") center / cover no-repeat;
+  }
+
+  /* Invisible click hotspots over the screenshot */
+  .hotspot {
+    position: absolute;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .hotspot:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .hotspot.plus    { left: 1399px; top: 0; width: 38px;  height: 49px; }
+  .hotspot.account { left: 1457px; top: 0; width: 158px; height: 49px; }
+  .hotspot.my-profile { left: 1451px; top: 49px; width: 135px; height: 18px; }
+
+  /* Figma-style hint: clicking a dead area flashes the hotspots */
+  .stage.hint .hotspot,
+  .stage.hint .popover-close,
+  .stage.hint .popover-cta {
+    box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
+    background-color: rgba(24, 160, 251, 0.25);
+  }
+
+  /* ---------- Plus menu with the "Customer Submission" popover ---------- */
+  .popover-shell {
+    left: 1291px; top: 40px;
+    width: 254px; height: 232px;
+    background: url("assets/plus-menu-popover.png") 0 0 / 254px 262px no-repeat;
+  }
+  .popover-shell-bottom {
+    left: 1291px; top: 261px;
+    width: 254px; height: 25px;
+    background: url("assets/plus-menu-popover.png") 0 100% / 254px 262px no-repeat;
+  }
+
+  .promo-card {
+    left: 1317px; top: 100px;
+    width: 206px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 16px;
+    background: var(--mint);
+    border-radius: 16px;
+    font-family: "Inter", sans-serif;
+    color: #000;
+  }
+  .promo-card .copy { display: flex; flex-direction: column; gap: 8px; }
+  .promo-card .title-row { display: flex; gap: 8px; align-items: flex-start; }
+  .promo-card h3 {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: normal;
+  }
+  .promo-card p { margin: 0; font-size: 12px; line-height: normal; }
+
+  .popover-close {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .popover-close img { display: block; width: 24px; height: 24px; }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 8px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--blue);
+    color: #fff;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: normal;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: #005f98; }
+  .popover-cta { width: 100%; }
+
+  /* ---------- Plus menu after dismissing the promo ---------- */
+  .plus-menu {
+    left: 1283px; top: 40px;
+    width: 275px; height: 68px;
+    background: url("assets/plus-menu.png") center / cover no-repeat;
+  }
+
+  /* ---------- Account menu ---------- */
+  .account-menu {
+    left: 1437px; top: 39px;
+    width: 163px; height: 93px;
+    background: url("assets/account-menu.png") 0 -5px / 163px 98px no-repeat;
+  }
+
+  /* ---------- My Profile + registration banner ---------- */
+  /* Profile content is taller than the stage, so it scrolls */
+  .screen[data-screen="profile"] {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .screen[data-screen="profile"]::-webkit-scrollbar { display: none; }
+
+  .profile-page {
+    position: relative;
+    min-height: 100%;
+    padding-bottom: 1px;
+    background: var(--app-bg);
+  }
+  /* Header + "My Profile" bar from the app screenshot */
+  .profile-top {
+    height: 149px;
+    background: url("assets/my-profile.png") 0 0 / 1612px 847px no-repeat;
+  }
+  /* Personal Information + Signature from the same screenshot */
+  .profile-bottom {
+    height: 355px;
+    margin-left: 3px;
+    background: url("assets/my-profile.png") 0 -492px / 1612px 847px no-repeat;
+  }
+
+  .register-banner {
+    margin-left: 27px;
+    width: 1569px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 48px 168px;
+    background: var(--mint);
+    border: 1px solid var(--blue);
+    border-radius: 4px;
+    font-family: "Inter", sans-serif;
+  }
+  .register-banner h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: normal;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  .register-card {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    padding: 24px;
+    background: #fff;
+    border-radius: 4px;
+  }
+  .register-main {
+    flex: 1;
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 16px 0;
+  }
+  .register-main p {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: normal;
+    color: var(--gray-text);
+  }
+  .phone-form { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+  .phone-form-row { display: flex; gap: 8px; align-items: flex-end; }
+  .phone-form input {
+    width: 283px;
+    height: 40px;
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: #fff;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 14px;
+    color: var(--gray-text);
+  }
+  .phone-form .btn-primary { font-size: 12px; }
+  .phone-form input::placeholder { color: var(--gray-text); opacity: 1; }
+  .phone-form input:focus { outline: none; border-color: var(--blue); }
+  .phone-form input[aria-invalid="true"] { border-color: var(--error); }
+  .phone-error {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    min-height: 15px;
+    font-size: 12px;
+    line-height: normal;
+    color: var(--error);
+  }
+  .phone-error:empty { display: none; }
+  .phone-error svg { flex-shrink: 0; }
+
+  /* ---------- Success banner ---------- */
+  .success-banner {
+    margin: 0 0 24px 27px;
+    width: 1569px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--mint);
+    border: 1px solid var(--green);
+    border-radius: 4px;
+    font-family: "Inter", sans-serif;
+    color: var(--ink);
+  }
+  .success-banner .icon { flex-shrink: 0; display: block; }
+  .success-banner .msg { flex: 1; min-width: 0; }
+  .success-banner h2 { margin: 0; font-size: 14px; font-weight: 700; line-height: normal; }
+  .success-banner h2:focus { outline: none; }
+  .success-banner p { margin: 4px 0 0; font-size: 12px; line-height: normal; color: var(--gray-text); }
+  .success-banner p strong { font-weight: 600; color: var(--ink); }
+  .link-btn {
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+  .link-btn:hover { color: #005f98; }
+  .icon-btn {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: rgba(0, 0, 0, 0.06); }
+  .icon-btn img { display: block; width: 24px; height: 24px; }
+
+  /* ---------- "Text a photo" tile (matches the app's info tiles) ---------- */
+  .info-tile {
+    margin: 0 0 4px 27px;
+    width: 1572px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    font-family: "Source Sans 3", sans-serif;
+  }
+  .info-tile-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 54px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--app-divider);
+  }
+  .info-tile-head h2 {
+    margin: 0;
+    font-size: 15.5px;
+    font-weight: 700;
+    line-height: normal;
+    color: var(--app-ink);
+  }
+  .info-tile-head h2:focus { outline: none; }
+  .btn-secondary {
+    height: 29px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: #fff;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--app-ink);
+    cursor: pointer;
+  }
+  .btn-secondary:hover { background: #f7f7f7; }
+  .info-tile-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .agency-number {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--app-ink);
+    white-space: nowrap;
+  }
+  .agency-number strong { font-weight: 600; }
+  .copy-btn {
+    width: 24px; height: 24px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #6b6b6b;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: #f0f0f0; color: var(--app-ink); }
+  .copy-btn:focus-visible { outline: 2px solid var(--app-link); outline-offset: 1px; }
+  .info-tile .link-btn {
+    margin-left: 12px;
+    font-size: 12px;
+    color: var(--app-link);
+  }
+  .info-tile .link-btn:hover { color: #03446d; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 32px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #222;
+    color: #fff;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast svg { flex-shrink: 0; }
+  .info-tile-body {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    padding: 12px 20px 20px;
+  }
+  .info-tile-main { flex: 1; min-width: 0; }
+  .kv { margin: 0; }
+  .kv dt {
+    display: block;
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 14px;
+    color: var(--app-label);
+  }
+  .kv dd {
+    margin: 6px 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 14px;
+    color: var(--app-value);
+  }
+  .info-tile .how-it-works { font-family: "Inter", sans-serif; }
+
+
+  .how-it-works {
+    flex-shrink: 0;
+    width: 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 24px;
+    background: var(--mint);
+    border-radius: 16px;
+    color: #000;
+  }
+  .how-it-works h3 { margin: 0; font-size: 12px; font-weight: 700; line-height: normal; }
+  .how-it-works ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .how-it-works li {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    line-height: normal;
+  }
+  .how-it-works li:first-child { align-items: flex-start; }
+  .how-it-works li span:last-child { width: 239px; }
+  .how-it-works li:first-child span:last-child { width: 228px; min-height: 35px; display: flex; align-items: center; }
+  .step-num {
+    flex-shrink: 0;
+    width: 33px;
+    padding: 8px;
+    border-radius: 100px;
+    background: var(--green);
+    color: var(--mint);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+
+    <!-- 1. Dashboard (flow start) -->
+    <section class="screen" data-screen="dashboard" aria-label="Dashboard">
+      <div class="layer bg"></div>
+      <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
+      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
+    </section>
+
+    <!-- 2. Plus menu with "Just text a photo" promo -->
+    <section class="screen" data-screen="promo" aria-label="Create menu with promo">
+      <div class="layer bg"></div>
+      <div class="layer popover-shell"></div>
+      <div class="layer popover-shell-bottom"></div>
+      <div class="layer promo-card">
+        <div class="copy">
+          <div class="title-row">
+            <h3>Just text a photo to report an issue.</h3>
+            <button class="popover-close" data-go="plus-menu" aria-label="Dismiss">
+              <img src="assets/icon-x.svg" alt="" width="24" height="24">
+            </button>
+          </div>
+          <p>Simply register your phone number to get started.</p>
+        </div>
+        <button class="btn-primary popover-cta" data-go="profile">Get Started</button>
+      </div>
+      <button class="hotspot plus" data-go="dashboard" aria-label="Close create menu"></button>
+      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
+    </section>
+
+    <!-- 3. Plus menu after promo dismissed -->
+    <section class="screen" data-screen="plus-menu" aria-label="Create menu">
+      <div class="layer bg"></div>
+      <div class="layer plus-menu"></div>
+      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
+    </section>
+
+    <!-- 4. Account menu -->
+    <section class="screen" data-screen="account" aria-label="Account menu">
+      <div class="layer bg"></div>
+      <div class="layer account-menu"></div>
+      <button class="hotspot account" data-go="dashboard" aria-label="Close account menu"></button>
+      <button class="hotspot my-profile" data-go="profile" aria-label="My Profile"></button>
+    </section>
+
+    <!-- 5. My Profile with phone registration -->
+    <section class="screen" data-screen="profile" aria-label="My Profile">
+      <div class="profile-page">
+        <div class="profile-top"></div>
+
+        <!-- Before registration -->
+        <div class="register-banner" id="register-banner">
+          <h2>Report an issue in seconds — just register your number and text a photo</h2>
+          <div class="register-card">
+            <div class="register-main">
+              <p>Register your phone number to start creating submissions with a single text message.</p>
+              <form class="phone-form" novalidate>
+                <div class="phone-form-row">
+                  <input type="tel" inputmode="tel" maxlength="20" placeholder="Enter Cell Number" aria-label="Cell number" autocomplete="tel" aria-describedby="register-error">
+                  <button type="submit" class="btn-primary">Register my phone number</button>
+                </div>
+                <p class="phone-error" id="register-error" aria-live="polite"></p>
+              </form>
+            </div>
+            <aside class="how-it-works">
+              <h3>How it works</h3>
+              <ol>
+                <li><span class="step-num">1</span><span>Text a photo with a short note.</span></li>
+                <li><span class="step-num">2</span><span>A submission is created on your behalf.</span></li>
+                <li><span class="step-num">3</span><span>Receive a confirmation or answer a few short questions via text.</span></li>
+              </ol>
+            </aside>
+          </div>
+        </div>
+
+        <!-- After registration -->
+        <div class="success-banner" id="success-banner" hidden>
+          <svg class="icon" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#56a27b"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="msg">
+            <h2 tabindex="-1">Phone number registered</h2>
+            <p aria-live="polite">
+              <span id="success-copy"></span>
+              <button type="button" class="link-btn" id="resend-text">Resend text</button>
+            </p>
+          </div>
+          <button class="icon-btn" id="dismiss-success" aria-label="Dismiss message">
+            <img src="assets/icon-x.svg" alt="" width="24" height="24">
+          </button>
+        </div>
+
+        <section class="info-tile" id="text-tile" aria-labelledby="text-tile-title" hidden>
+          <header class="info-tile-head">
+            <h2 id="text-tile-title" tabindex="-1">Text a photo</h2>
+            <div class="info-tile-actions">
+              <div class="agency-number">
+                <span>Your agency's text number: <strong id="agency-number">(909) 555-0142</strong></span>
+                <button type="button" class="copy-btn" id="copy-agency-number" aria-label="Copy agency text number">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
+              </div>
+              <button class="btn-secondary" id="change-phone">Change phone number</button>
+              <button class="btn-secondary" id="cancel-change" hidden>Cancel</button>
+            </div>
+          </header>
+          <div class="info-tile-body">
+            <!-- "How it works" is cloned in here (first) from the registration banner -->
+            <div class="info-tile-main">
+              <dl class="kv" id="phone-kv">
+                <dt>Registered Phone Number</dt>
+                <dd data-phone></dd>
+              </dl>
+              <form class="phone-form" id="change-form" novalidate hidden>
+                <div class="phone-form-row">
+                  <input id="change-input" type="tel" aria-label="New phone number" inputmode="tel" maxlength="20" placeholder="Enter Cell Number" autocomplete="tel" aria-describedby="change-error">
+                  <button type="submit" class="btn-primary">Register my phone number</button>
+                </div>
+                <p class="phone-error" id="change-error" aria-live="polite"></p>
+              </form>
+            </div>
+            
+          </div>
+        </section>
+
+        <div class="profile-bottom"></div>
+      </div>
+      <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
+      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#56a27b"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="toast-text"></span>
+    </div>
+  </div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const screens = [...stage.querySelectorAll('.screen')];
+  const START = 'dashboard';
+
+  function show(name, { push = true } = {}) {
+    const target = screens.find(s => s.dataset.screen === name) || screens[0];
+    if (!target.classList.contains('active')) target.scrollTop = 0;
+    screens.forEach(s => s.classList.toggle('active', s === target));
+    if (push && location.hash.slice(1) !== target.dataset.screen) {
+      history.pushState(null, '', '#' + target.dataset.screen);
+    }
+  }
+
+  // Scale the fixed canvas to fit the window
+  function fit() {
+    const scale = Math.min(window.innerWidth / 1612, window.innerHeight / 847);
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  let hintTimer;
+  stage.addEventListener('click', e => {
+    const link = e.target.closest('[data-go]');
+    if (link) { show(link.dataset.go); return; }
+    // Clicked somewhere without an interaction: flash hotspots, like Figma
+    if (e.target.closest('input, form, button, label')) return;
+    stage.classList.add('hint');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => stage.classList.remove('hint'), 600);
+  });
+
+  // "R" restarts the flow, like Figma prototypes
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'r' || e.key === 'R') && !e.target.closest('input')) { resetProfile(); show(START); }
+  });
+
+  /* ---------- Phone registration on the profile page ---------- */
+  const ERROR_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 7v6M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  const registerBanner = document.getElementById('register-banner');
+  const successBanner = document.getElementById('success-banner');
+  const tile = document.getElementById('text-tile');
+  const phoneKv = document.getElementById('phone-kv');
+  const changeForm = document.getElementById('change-form');
+  const changeBtn = document.getElementById('change-phone');
+  const cancelBtn = document.getElementById('cancel-change');
+  const forms = [...document.querySelectorAll('.phone-form')];
+
+  tile.querySelector('.info-tile-body').prepend(registerBanner.querySelector('.how-it-works').cloneNode(true));
+
+  const successCopy = document.getElementById('success-copy');
+  const resendBtn = document.getElementById('resend-text');
+
+  let profile = { phone: null, bannerDismissed: false, editing: false, resent: false };
+
+  // Accepts US numbers in common formats: 5551234567, 555-123-4567, (555) 123-4567,
+  // 555.123.4567, +1 555 123 4567, 1-555-123-4567
+  function formatPhone(raw) {
+    const value = raw.trim();
+    if (!/^\+?[\d\s().-]+$/.test(value)) return null;
+    let digits = value.replace(/\D/g, '');
+    if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+    if (!/^[2-9]\d{2}[2-9]\d{6}$/.test(digits)) return null;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  function setError(form, message) {
+    const input = form.querySelector('input');
+    const error = form.querySelector('.phone-error');
+    input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    error.innerHTML = message ? ERROR_ICON + '<span>' + message + '</span>' : '';
+  }
+
+  function renderSuccessCopy() {
+    const phone = '<strong>' + (profile.phone || '') + '</strong>';
+    successCopy.innerHTML = profile.resent
+      ? 'We sent another text to ' + phone + '. It can take a minute to arrive. Save that number to your contacts, then text it a photo anytime to create a submission.'
+      : 'We just sent a text to ' + phone + '. Save that number to your contacts, then text it a photo anytime to create a submission.';
+  }
+
+  function render() {
+    renderSuccessCopy();
+    const { phone, bannerDismissed, editing } = profile;
+    registerBanner.hidden = !!phone;
+    successBanner.hidden = !phone || bannerDismissed;
+    tile.hidden = !phone;
+    phoneKv.hidden = editing;
+    changeForm.hidden = !editing;
+    changeBtn.hidden = editing;
+    cancelBtn.hidden = !editing;
+    document.querySelectorAll('[data-phone]').forEach(el => { el.textContent = phone || ''; });
+  }
+
+  function resetForm(form) {
+    form.querySelector('input').value = '';
+    setError(form, '');
+  }
+
+  function resetProfile() {
+    profile = { phone: null, bannerDismissed: false, editing: false, resent: false };
+    forms.forEach(resetForm);
+    render();
+  }
+
+  forms.forEach(form => {
+    const input = form.querySelector('input');
+
+    // Only allow characters that can appear in a phone number
+    input.addEventListener('input', () => {
+      const before = input.value;
+      const after = before.replace(/[^\d\s().+-]/g, '');
+      if (after !== before) {
+        const caret = input.selectionStart - (before.length - after.length);
+        input.value = after;
+        input.setSelectionRange(caret, caret);
+      }
+      if (input.getAttribute('aria-invalid') === 'true') setError(form, '');
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const phone = formatPhone(input.value);
+      if (!phone) {
+        setError(form, input.value.trim()
+          ? 'Enter a valid 10-digit phone number, like (555) 123-4567.'
+          : 'Enter your cell phone number.');
+        input.focus();
+        return;
+      }
+      resetForm(form);
+      profile = { phone, bannerDismissed: false, editing: false, resent: false };
+      render();
+      successBanner.querySelector('h2').focus();
+    });
+  });
+
+  // Resend: confirm in the copy; the link stays so they can resend again
+  /* ---------- Agency text number ---------- */
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toast-text');
+  let toastTimer;
+
+  function showToast(message) {
+    toastText.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for browsers that block the async clipboard API (e.g. file://)
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.append(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+  }
+
+  document.getElementById('copy-agency-number').addEventListener('click', async () => {
+    const number = document.getElementById('agency-number').textContent;
+    await copyText(number);
+    showToast('Phone number copied');
+  });
+
+  document.getElementById('send-test-text').addEventListener('click', () => {
+    showToast('Text sent to ' + profile.phone);
+  });
+
+  resendBtn.addEventListener('click', () => {
+    profile.resent = true;
+    renderSuccessCopy();
+  });
+
+  document.getElementById('dismiss-success').addEventListener('click', () => {
+    profile.bannerDismissed = true;
+    render();
+    document.getElementById('text-tile-title').focus();
+  });
+
+  changeBtn.addEventListener('click', () => {
+    profile.editing = true;
+    render();
+    changeForm.querySelector('input').focus();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    profile.editing = false;
+    resetForm(changeForm);
+    render();
+    changeBtn.focus();
+  });
+
+  window.addEventListener('popstate', () => show(location.hash.slice(1) || START, { push: false }));
+  window.addEventListener('resize', fit);
+  fit();
+  show(location.hash.slice(1) || START, { push: false });
+</script>
+</body>
+</html>
