@@ -188,6 +188,7 @@
     cursor: pointer;
   }
   .hdr-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+  button.nav-item:hover { color: #fff; }
   .hdr-plus { width: 24px; height: 24px; border-radius: 50%; }
   .hdr-plus svg { display: block; }
   .hdr-account svg { position: absolute; }
@@ -621,7 +622,7 @@
       <header class="app-header" style="height:60px">
         <img class="logo" src="assets/logo-dubuque.png" alt="City of Dubuque" style="left:23px;top:11px;width:74px;height:34px">
         <div class="nav-active-bg" style="left:116.5px;width:75.5px"></div>
-        <span class="t nav-item is-active" style="left:123.92px;top:21.68px">Dashboard</span>
+        <button type="button" class="t nav-item is-active hdr-btn" style="left:123.92px;top:21.68px" data-go="dashboard" aria-current="page">Dashboard</button>
         <span class="t nav-item" style="left:219.92px;top:22px">Reports</span>
         <span class="t nav-item" style="left:298.86px;top:21.66px">Cases</span>
         <span class="t nav-item" style="left:366.36px;top:21.7px">Customer Submissions</span>
@@ -737,7 +738,7 @@
         <div class="profile-top">
           <header class="app-header" style="height:64px">
             <img class="logo" src="assets/logo-upland.png" alt="City of Upland" style="left:23px;top:14px;width:134px;height:36px">
-            <span class="t nav-item" style="left:183.92px;top:25.68px">Dashboard</span>
+            <button type="button" class="t nav-item hdr-btn" style="left:183.92px;top:25.68px" data-go="dashboard">Dashboard</button>
             <span class="t nav-item" style="left:279.92px;top:26px">Reports</span>
             <span class="t nav-item" style="left:358.86px;top:25.7px">Customer Submissions</span>
             <span class="t nav-item" style="left:520.03px;top:25.7px">Action Center</span>
