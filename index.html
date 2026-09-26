@@ -906,8 +906,10 @@
     });
   }
 
+  // The promo only shows while no phone is registered, and never again once dismissed
   function renderPromo() {
-    document.querySelectorAll('.create-menu').forEach(m => m.classList.toggle('promo-dismissed', promoDismissed));
+    const hidePromo = promoDismissed || !!profile.phone;
+    document.querySelectorAll('.create-menu').forEach(m => m.classList.toggle('promo-dismissed', hidePromo));
   }
 
   let hintTimer;
@@ -991,6 +993,7 @@
     changeBtn.hidden = editing;
     cancelBtn.hidden = !editing;
     document.querySelectorAll('[data-phone]').forEach(el => { el.textContent = phone || ''; });
+    renderPromo();
   }
 
   function resetForm(form) {
