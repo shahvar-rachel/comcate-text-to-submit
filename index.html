@@ -6,7 +6,7 @@
 <title>Text to Create Submission</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,600&display=swap" rel="stylesheet">
 <style>
   :root {
     --stage-w: 1612px;
@@ -24,6 +24,7 @@
     --app-divider: #eeeeee;
     --error: #c62828;
     --app-link: #045a90;
+    --app-header: #2f2c3a;
     --banner-shadow: 0 1.1px 4.4px rgba(0, 0, 0, 0.066); /* app's info-tile shadow, ~10% stronger */
     --transition: 300ms cubic-bezier(0, 0, 0.58, 1); /* Figma "Ease out" */
   }
@@ -65,10 +66,117 @@
   }
 
   .layer { position: absolute; }
-  .bg {
+
+  /* ================= App chrome (rebuilt from the app screenshots) =================
+     Positions are measured from the original 2x screenshots, so fixed elements use
+     absolute coordinates. Text uses line-height: 1 and is placed by its top-left. */
+  .app {
+    position: absolute;
     left: 0; top: 0;
     width: 1611px; height: 846px;
-    background: url("assets/dashboard.png") center / cover no-repeat;
+    overflow: hidden;
+    background: var(--app-bg);
+    font-family: "Source Sans 3", sans-serif;
+  }
+  .t { position: absolute; margin: 0; line-height: 1; white-space: nowrap; font-family: "Source Sans 3", sans-serif; }
+
+  .app-header { position: absolute; left: 0; top: 0; width: 100%; background: var(--app-header); }
+  .app-header .logo { position: absolute; display: block; }
+  .nav-active-bg { position: absolute; top: 0; bottom: 0; background: #44414e; }
+  /* 700 at 12.6px matches the screenshot's heavier light-on-dark rendering */
+  .nav-item,
+  .hdr-name { margin: 0.28px 0 0 0.2px; font-size: 12.6px; font-weight: 700; }
+  .nav-item { color: #828089; }
+  .nav-item.is-active,
+  .hdr-name { color: #fff; }
+  .hdr-icon { position: absolute; display: block; }
+  .hdr-divider { position: absolute; width: 0.5px; height: 23.5px; background: #fff; }
+
+  .app-subbar { position: absolute; left: 0; width: 100%; height: 64px; background: #fff; }
+  .page-title { font-size: 16px; font-weight: 600; color: var(--app-ink); }
+  .seg { position: absolute; top: 76px; height: 32px; }
+  .seg-on { left: 114px; width: 196.5px; background: var(--app-link); }
+  .seg-off { left: 310.5px; width: 196px; border: 0.5px solid var(--border); border-left: 0; }
+  .seg-label { font-size: 11.2px; font-weight: 400; }
+  .filter-label { font-size: 11px; color: var(--app-ink); }
+
+  .section-title { font-size: 16px; font-weight: 600; color: var(--app-ink); }
+
+  .card {
+    position: absolute;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+  .stat { padding: 25.8px 20px 0; }
+  .stat-title { margin: 0; height: 20px; line-height: 20px; color: var(--app-link); white-space: nowrap; }
+  .stat-title b { font-size: 20px; font-weight: 700; }
+  .stat-title span { font-size: 16px; font-weight: 600; margin-left: 1px; }
+  .stat-title svg { margin-left: 5.2px; vertical-align: -0.2px; }
+  .stat-list { margin: 28.1px 0 0; padding: 0; list-style: none; font-size: 10.4px; line-height: 15.75px; color: #959595; }
+  .stat-list b { font-weight: 700; }
+  .stat-more { display: block; margin-top: 0.6px; font-size: 11px; line-height: 15.75px; font-weight: 700; color: var(--app-link); }
+  .stat-empty {
+    margin: 0;
+    padding: 23.7px 0 0 23px;
+    font-size: 16.5px;
+    line-height: 20px;
+    font-style: italic;
+    font-weight: 600;
+    color: #959595;
+  }
+
+  /* The tab runs past the right edge of the page, so its label sits right of centre */
+  .help-tab {
+    position: absolute;
+    left: 1587.5px; top: 397.5px;
+    width: 32px; height: 46.5px;
+    background: var(--app-link);
+    border-radius: 3px 0 0 3px;
+    box-shadow: -2px 0 6px rgba(0, 0, 0, 0.12);
+    color: #fff;
+  }
+  .help-tab span {
+    position: absolute;
+    left: 10.87px; top: 34px;
+    font-size: 11.4px;
+    line-height: 1;
+    transform-origin: 0 0;
+    transform: rotate(-90deg);
+  }
+
+  /* ---------- Dropdown menus ---------- */
+  .menu-card {
+    position: absolute;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.33);
+  }
+  .menu-caret {
+    position: absolute;
+    width: 0; height: 0;
+    border-left: 7.75px solid transparent;
+    border-right: 7.75px solid transparent;
+    border-bottom: 8px solid #fff;
+  }
+  .menu-heading { font-size: 12.85px; font-weight: 400; color: var(--app-value); }
+  .account-menu-card { box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.35); }
+  .menu-item { font-size: 13px; font-weight: 600; color: #1b1b1b; }
+  .pill-off {
+    position: absolute;
+    font-family: "Source Sans 3", sans-serif;
+    left: 1542.56px; top: 74.98px;
+    width: 30.3px; height: 12.47px;
+    display: grid;
+    place-items: center;
+    padding-left: 1.6px;
+    border-radius: 6.25px;
+    background: #d13b37;
+    color: #fff;
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    line-height: 1;
   }
 
   /* Invisible click hotspots over the screenshot */
@@ -92,18 +200,6 @@
   .stage.hint .popover-cta {
     box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
     background-color: rgba(24, 160, 251, 0.25);
-  }
-
-  /* ---------- Plus menu with the "Customer Submission" popover ---------- */
-  .popover-shell {
-    left: 1291px; top: 40px;
-    width: 254px; height: 232px;
-    background: url("assets/plus-menu-popover.png") 0 0 / 254px 262px no-repeat;
-  }
-  .popover-shell-bottom {
-    left: 1291px; top: 261px;
-    width: 254px; height: 25px;
-    background: url("assets/plus-menu-popover.png") 0 100% / 254px 262px no-repeat;
   }
 
   .promo-card {
@@ -160,20 +256,6 @@
   .btn-primary:hover { background: #005f98; }
   .popover-cta { width: 100%; }
 
-  /* ---------- Plus menu after dismissing the promo ---------- */
-  .plus-menu {
-    left: 1283px; top: 40px;
-    width: 275px; height: 68px;
-    background: url("assets/plus-menu.png") center / cover no-repeat;
-  }
-
-  /* ---------- Account menu ---------- */
-  .account-menu {
-    left: 1437px; top: 39px;
-    width: 163px; height: 93px;
-    background: url("assets/account-menu.png") 0 -5px / 163px 98px no-repeat;
-  }
-
   /* ---------- My Profile + registration banner ---------- */
   /* Profile content is taller than the stage, so it scrolls */
   .screen[data-screen="profile"] {
@@ -188,17 +270,44 @@
     padding-bottom: 1px;
     background: var(--app-bg);
   }
-  /* Header + "My Profile" bar from the app screenshot */
-  .profile-top {
-    height: 149px;
-    background: url("assets/my-profile.png") 0 0 / 1612px 847px no-repeat;
+  /* Header + "My Profile" bar, then 21px of page background */
+  .profile-top { position: relative; height: 149px; }
+  /* Personal Information + Signature, cut off at the same point as the original frame */
+  .profile-bottom { height: 355px; padding-top: 20px; overflow: hidden; }
+  .profile-bottom .info-tile { margin-bottom: 0; }
+  .pi-head { position: relative; }
+  .pi-head .btn-secondary,
+  .pi-head .btn-edit { position: absolute; top: 12px; height: 29px; padding: 2px 0 0; white-space: nowrap; }
+  .pi-head .btn-secondary { font-size: 11.25px; }
+  .info-tile-head.pi-head h2 { margin-top: 1.5px; }
+  .info-tile-head.sig-head h2 { margin-top: 3.2px; }
+  .pi-head .btn-secondary { left: 181px; width: 106px; }
+  .btn-edit {
+    left: 303px;
+    width: 72px;
+    border: 0;
+    border-radius: 2px;
+    background: var(--app-link);
+    color: #fff;
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 11.5px;
+    cursor: pointer;
   }
-  /* Personal Information + Signature from the same screenshot */
-  .profile-bottom {
-    height: 355px;
-    margin-left: 3px;
-    background: url("assets/my-profile.png") 0 -492px / 1612px 847px no-repeat;
+  .kv-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 387px);
+    row-gap: 9px;
+    margin: 0;
+    padding: 13.3px 20px 21.1px;
   }
+  .kv-grid .kv { margin: 0; }
+  .info-tile-head.sig-head { height: 43px; }
+  .sig-body { padding: 24px 20px 0; font-size: 12px; line-height: 16px; }
+  .sig-label { margin: 0; font-weight: 600; color: var(--app-label); }
+  .sig-label .pipe { color: var(--app-ink); font-weight: 400; margin: 0 3px; }
+  .sig-label a { font-size: 11.5px; color: var(--app-link); text-decoration: none; }
+  .sig-value { margin: 4.5px 0 22.5px 0.4px; font-family: Arial, sans-serif; font-size: 10.75px; color: var(--app-value); }
+  .sig-image { width: 51.5px; height: 40px; margin: 4.4px 0 0 52px; border-top: 1px solid #c9bda8; }
 
   .register-banner {
     margin-left: 27px;
@@ -431,14 +540,14 @@
   .kv dt {
     display: block;
     margin: 0;
-    font-size: 11px;
+    font-size: 11.3px;
     font-weight: 600;
     line-height: 14px;
     color: var(--app-label);
   }
   .kv dd {
-    margin: 6px 0 0;
-    font-size: 11px;
+    margin: 5.2px 0 0;
+    font-size: 11.15px;
     font-weight: 600;
     line-height: 14px;
     color: var(--app-value);
@@ -490,20 +599,99 @@
 </style>
 </head>
 <body>
+  <!-- Dashboard page, shared by the dashboard screen and its menu states -->
+  <template id="tpl-dashboard">
+    <div class="app" aria-hidden="true">
+      <header class="app-header" style="height:60px">
+        <img class="logo" src="assets/logo-dubuque.png" alt="City of Dubuque" style="left:23px;top:11px;width:74px;height:34px">
+        <div class="nav-active-bg" style="left:116.5px;width:75.5px"></div>
+        <span class="t nav-item is-active" style="left:123.92px;top:21.68px">Dashboard</span>
+        <span class="t nav-item" style="left:219.92px;top:22px">Reports</span>
+        <span class="t nav-item" style="left:298.86px;top:21.66px">Cases</span>
+        <span class="t nav-item" style="left:366.36px;top:21.7px">Customer Submissions</span>
+        <span class="t nav-item" style="left:527.53px;top:21.7px">Action Center</span>
+        <svg class="hdr-icon" style="left:1406px;top:16px" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg>
+        <div class="hdr-divider" style="left:1446.5px;top:16px"></div>
+        <svg class="hdr-icon" style="left:1457.5px;top:18.5px" width="19" height="19" viewBox="0 0 19 19" fill="#fff"><circle cx="2.6" cy="2.6" r="2.6"/><circle cx="9.5" cy="2.6" r="2.6"/><circle cx="16.4" cy="2.6" r="2.6"/><circle cx="2.6" cy="9.5" r="2.6"/><circle cx="9.5" cy="9.5" r="2.6"/><circle cx="16.4" cy="9.5" r="2.6"/><circle cx="2.6" cy="16.4" r="2.6"/><circle cx="9.5" cy="16.4" r="2.6"/><circle cx="16.4" cy="16.4" r="2.6"/></svg>
+        <span class="t hdr-name" style="left:1486.86px;top:21.66px">Comcate Support</span>
+        <svg class="hdr-icon" style="left:1587px;top:26.5px" width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg>
+      </header>
+
+      <div class="app-subbar" style="top:60px">
+        <h1 class="t page-title" style="left:22.67px;top:24.3px">Dashboard</h1>
+        <div class="seg seg-on" style="top:16px"></div>
+        <div class="seg seg-off" style="top:16px"></div>
+        <span class="t seg-label" style="left:168.43px;top:25.97px;color:#fff">Code Enforcement</span>
+        <span class="t seg-label" style="left:397.95px;top:25.9px;color:var(--app-ink)">CRM</span>
+        <span class="t filter-label" style="left:522.97px;top:25.97px">All Staff</span>
+        <svg class="hdr-icon" style="left:559.5px;top:29px" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M0.5 0.7L5 5.2 9.5 0.7" stroke="#cecece" stroke-width="1"/></svg>
+      </div>
+
+      <h2 class="t section-title" style="left:22.72px;top:149.66px">Cases</h2>
+      <div class="card stat" style="left:23px;top:183px;width:777.5px;height:158px">
+        <p class="stat-title"><b>474</b> <span>Open cases for my agency</span><svg width="4.5" height="8" viewBox="0 0 4.5 8" fill="none"><path d="M0.5 0.5l3.5 3.5-3.5 3.5" stroke="#045a90" stroke-width="0.9"/></svg></p>
+        <ol class="stat-list">
+          <li><b>1. Connor Dore</b> 39% (187 cases)</li>
+          <li><b>2. Manu Tyagi</b> 35% (167 cases)</li>
+          <li><b>3. Bharat Barve</b> 4% (19 cases)</li>
+        </ol>
+        <span class="stat-more">Show more</span>
+      </div>
+      <div class="card stat" style="left:817px;top:183px;width:778px;height:158px">
+        <p class="stat-title"><b>552</b> <span>Total cases for my agency</span><svg width="4.5" height="8" viewBox="0 0 4.5 8" fill="none"><path d="M0.5 0.5l3.5 3.5-3.5 3.5" stroke="#045a90" stroke-width="0.9"/></svg></p>
+        <ol class="stat-list">
+          <li><b>1. Connor Dore</b> 43% (238 cases)</li>
+          <li><b>2. Manu Tyagi</b> 32% (179 cases)</li>
+          <li><b>3. Bharat Barve</b> 3% (19 cases)</li>
+        </ol>
+        <span class="stat-more">Show more</span>
+      </div>
+
+      <h2 class="t section-title" style="left:22.67px;top:376.33px">Inspections</h2>
+      <div class="card stat" style="left:23px;top:409.5px;width:1572px;height:70px">
+        <p class="stat-title"><b>28</b> <span>Unscheduled Inspections</span><svg width="4.5" height="8" viewBox="0 0 4.5 8" fill="none"><path d="M0.5 0.5l3.5 3.5-3.5 3.5" stroke="#045a90" stroke-width="0.9"/></svg></p>
+      </div>
+      <div class="card stat" style="left:23px;top:481px;width:1572px;height:158px">
+        <p class="stat-title"><b>445</b> <span>Overdue Inspections</span><svg width="4.5" height="8" viewBox="0 0 4.5 8" fill="none"><path d="M0.5 0.5l3.5 3.5-3.5 3.5" stroke="#045a90" stroke-width="0.9"/></svg></p>
+        <ol class="stat-list">
+          <li><b>1. Connor Dore</b> 34% (151 inspections)</li>
+          <li><b>2. Manu Tyagi</b> 31% (138 inspections)</li>
+          <li><b>3. Dave Richmond</b> 8% (34 inspections)</li>
+        </ol>
+        <span class="stat-more">Show more</span>
+      </div>
+      <div class="card" style="left:23px;top:640.5px;width:1572px;height:69.5px">
+        <p class="stat-empty">There are no inspections due today in your agency</p>
+      </div>
+      <div class="card stat" style="left:23px;top:711.5px;width:1572px;height:158px">
+        <p class="stat-title"><b>474</b> <span>Total Inspections</span><svg width="4.5" height="8" viewBox="0 0 4.5 8" fill="none"><path d="M0.5 0.5l3.5 3.5-3.5 3.5" stroke="#045a90" stroke-width="0.9"/></svg></p>
+        <ol class="stat-list">
+          <li><b>1. Connor Dore</b> 32% (152 inspections)</li>
+          <li><b>2. Manu Tyagi</b> 30% (140 inspections)</li>
+          <li><b>3. Dave Richmond</b> 7% (34 inspections)</li>
+        </ol>
+        <span class="stat-more">Show more</span>
+      </div>
+
+      <div class="help-tab"><span>Help</span></div>
+    </div>
+  </template>
+
   <div class="stage" id="stage">
 
     <!-- 1. Dashboard (flow start) -->
     <section class="screen" data-screen="dashboard" aria-label="Dashboard">
-      <div class="layer bg"></div>
+      <div data-include="tpl-dashboard"></div>
       <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
       <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
     </section>
 
     <!-- 2. Plus menu with "Just text a photo" promo -->
     <section class="screen" data-screen="promo" aria-label="Create menu with promo">
-      <div class="layer bg"></div>
-      <div class="layer popover-shell"></div>
-      <div class="layer popover-shell-bottom"></div>
+      <div data-include="tpl-dashboard"></div>
+      <div class="menu-card" style="left:1302.5px;top:56px;width:236px;height:219.5px"></div>
+      <div class="menu-caret" style="left:1412.5px;top:48px"></div>
+      <span class="t menu-heading" style="left:1314.33px;top:71.26px">Customer Submission</span>
       <div class="layer promo-card">
         <div class="copy">
           <div class="title-row">
@@ -522,15 +710,21 @@
 
     <!-- 3. Plus menu after promo dismissed -->
     <section class="screen" data-screen="plus-menu" aria-label="Create menu">
-      <div class="layer bg"></div>
-      <div class="layer plus-menu"></div>
+      <div data-include="tpl-dashboard"></div>
+      <div class="menu-card" style="left:1300.5px;top:56px;width:235.5px;height:41px"></div>
+      <div class="menu-caret" style="left:1410.5px;top:48px"></div>
+      <span class="t menu-heading" style="left:1312.33px;top:71.26px">Customer Submission</span>
       <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
     </section>
 
     <!-- 4. Account menu -->
     <section class="screen" data-screen="account" aria-label="Account menu">
-      <div class="layer bg"></div>
-      <div class="layer account-menu"></div>
+      <div data-include="tpl-dashboard"></div>
+      <div class="menu-card account-menu-card" style="left:1450.8px;top:39.3px;width:136.3px;height:81.1px"></div>
+      <span class="t menu-item" style="left:1458.64px;top:46.65px">My Profile</span>
+      <span class="t menu-item" style="left:1458.64px;top:73.66px">Delegate Work</span>
+      <span class="pill-off">OFF</span>
+      <span class="t menu-item" style="left:1458.64px;top:101.04px">Logout</span>
       <button class="hotspot account" data-go="dashboard" aria-label="Close account menu"></button>
       <button class="hotspot my-profile" data-go="profile" aria-label="My Profile"></button>
     </section>
@@ -538,7 +732,23 @@
     <!-- 5. My Profile with phone registration -->
     <section class="screen" data-screen="profile" aria-label="My Profile">
       <div class="profile-page">
-        <div class="profile-top"></div>
+        <div class="profile-top">
+          <header class="app-header" style="height:64px">
+            <img class="logo" src="assets/logo-upland.png" alt="City of Upland" style="left:23px;top:14px;width:134px;height:36px">
+            <span class="t nav-item" style="left:183.92px;top:25.68px">Dashboard</span>
+            <span class="t nav-item" style="left:279.92px;top:26px">Reports</span>
+            <span class="t nav-item" style="left:358.86px;top:25.7px">Customer Submissions</span>
+            <span class="t nav-item" style="left:520.03px;top:25.7px">Action Center</span>
+            <svg class="hdr-icon" style="left:1419.5px;top:20px" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg>
+            <div class="hdr-divider" style="left:1455.5px;top:20px"></div>
+            <svg class="hdr-icon" style="left:1466.5px;top:22.5px" width="19" height="19" viewBox="0 0 19 19" fill="#fff"><circle cx="2.6" cy="2.6" r="2.6"/><circle cx="9.5" cy="2.6" r="2.6"/><circle cx="16.4" cy="2.6" r="2.6"/><circle cx="2.6" cy="9.5" r="2.6"/><circle cx="9.5" cy="9.5" r="2.6"/><circle cx="16.4" cy="9.5" r="2.6"/><circle cx="2.6" cy="16.4" r="2.6"/><circle cx="9.5" cy="16.4" r="2.6"/><circle cx="16.4" cy="16.4" r="2.6"/></svg>
+            <span class="t hdr-name" style="left:1495.53px;top:25.5px">Amy Hopson</span>
+            <svg class="hdr-icon" style="left:1588px;top:30.5px" width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg>
+          </header>
+          <div class="app-subbar" style="top:64px">
+            <h1 class="t page-title" style="left:23.67px;top:25.49px">My Profile</h1>
+          </div>
+        </div>
 
         <!-- Before registration -->
         <div class="register-banner" id="register-banner">
@@ -614,7 +824,34 @@
           </div>
         </section>
 
-        <div class="profile-bottom"></div>
+        <div class="profile-bottom">
+          <section class="info-tile" aria-labelledby="pi-title">
+            <header class="info-tile-head pi-head">
+              <h2 id="pi-title">Personal Information</h2>
+              <button type="button" class="btn-secondary">Change Password</button>
+              <button type="button" class="btn-edit">Edit</button>
+            </header>
+            <div class="kv-grid">
+              <dl class="kv"><dt>First Name</dt><dd>Amy</dd></dl>
+              <dl class="kv"><dt>Last Name</dt><dd>Hopson</dd></dl>
+              <dl class="kv"><dt>Email</dt><dd>amy+prod4@comcate.com</dd></dl>
+              <dl class="kv"><dt>Phone</dt><dd>6463452839</dd></dl>
+              <dl class="kv"><dt>Title</dt><dd>-</dd></dl>
+              <dl class="kv"><dt>Department</dt><dd>Public Works</dd></dl>
+            </div>
+          </section>
+          <section class="info-tile" style="margin-top:24.5px" aria-labelledby="sig-title">
+            <header class="info-tile-head sig-head">
+              <h2 id="sig-title">Signature</h2>
+            </header>
+            <div class="sig-body">
+              <p class="sig-label">Signature Block<span class="pipe">|</span><a href="#profile">Edit</a></p>
+              <p class="sig-value">Wlecom Amy</p>
+              <p class="sig-label">Signature Image<span class="pipe">|</span><a href="#profile">Replace</a></p>
+              <div class="sig-image"></div>
+            </div>
+          </section>
+        </div>
       </div>
       <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
       <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
@@ -630,6 +867,10 @@
   const stage = document.getElementById('stage');
   const screens = [...stage.querySelectorAll('.screen')];
   const START = 'dashboard';
+
+  document.querySelectorAll('[data-include]').forEach(slot => {
+    slot.replaceWith(document.getElementById(slot.dataset.include).content.cloneNode(true));
+  });
 
   function show(name, { push = true } = {}) {
     const target = screens.find(s => s.dataset.screen === name) || screens[0];
