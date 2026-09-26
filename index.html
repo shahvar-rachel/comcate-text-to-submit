@@ -179,23 +179,40 @@
     line-height: 1;
   }
 
-  /* Invisible click hotspots over the screenshot */
-  .hotspot {
+  /* Header triggers: the + icon and the account name open their menus */
+  .hdr-btn {
     position: absolute;
-    display: block;
     padding: 0;
     border: 0;
-    background: transparent;
+    background: none;
     cursor: pointer;
-    z-index: 5;
   }
-  .hotspot:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
-  .hotspot.plus    { left: 1399px; top: 0; width: 38px;  height: 49px; }
-  .hotspot.account { left: 1457px; top: 0; width: 158px; height: 49px; }
-  .hotspot.my-profile { left: 1451px; top: 49px; width: 135px; height: 18px; }
+  .hdr-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+  .hdr-plus { width: 24px; height: 24px; border-radius: 50%; }
+  .hdr-plus svg { display: block; }
+  .hdr-account svg { position: absolute; }
 
-  /* Figma-style hint: clicking a dead area flashes the hotspots */
-  .stage.hint .hotspot,
+  /* Menus open over whichever page you're on. The anchor's variables shift them
+     to line up with that page's header (menus are positioned for the dashboard). */
+  .menu-anchor { position: absolute; left: 0; top: 0; z-index: 30; }
+  .menu {
+    position: absolute;
+    left: 0; top: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition), visibility 0s linear 300ms;
+  }
+  .menu.open { opacity: 1; visibility: visible; transition: opacity var(--transition), visibility 0s; }
+  .create-menu { transform: translate(var(--create-dx, 0), var(--create-dy, 0)); }
+  .account-menu { transform: translate(var(--account-dx, 0), var(--account-dy, 0)); }
+  .create-menu.promo-dismissed .promo-shell,
+  .create-menu:not(.promo-dismissed) .plain-shell { display: none !important; }
+  .menu-link { padding: 0; border: 0; background: none; cursor: pointer; }
+  .menu-link:hover { color: var(--app-link); }
+
+  /* Figma-style hint: clicking a dead area flashes what's clickable */
+  .stage.hint .hdr-btn,
+  .stage.hint .menu.open .menu-link,
   .stage.hint .popover-close,
   .stage.hint .popover-cta {
     box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
@@ -600,7 +617,7 @@
 <body>
   <!-- Dashboard page, shared by the dashboard screen and its menu states -->
   <template id="tpl-dashboard">
-    <div class="app" aria-hidden="true">
+    <div class="app">
       <header class="app-header" style="height:60px">
         <img class="logo" src="assets/logo-dubuque.png" alt="City of Dubuque" style="left:23px;top:11px;width:74px;height:34px">
         <div class="nav-active-bg" style="left:116.5px;width:75.5px"></div>
@@ -609,11 +626,10 @@
         <span class="t nav-item" style="left:298.86px;top:21.66px">Cases</span>
         <span class="t nav-item" style="left:366.36px;top:21.7px">Customer Submissions</span>
         <span class="t nav-item" style="left:527.53px;top:21.7px">Action Center</span>
-        <svg class="hdr-icon" style="left:1406px;top:16px" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg>
+        <button type="button" class="hdr-btn hdr-plus" style="left:1406px;top:16px" data-menu-toggle="create" aria-label="Create" aria-haspopup="true" aria-expanded="false"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg></button>
         <div class="hdr-divider" style="left:1446.5px;top:16px"></div>
         <svg class="hdr-icon" style="left:1457.5px;top:18.5px" width="19" height="19" viewBox="0 0 19 19" fill="#fff"><circle cx="2.6" cy="2.6" r="2.6"/><circle cx="9.5" cy="2.6" r="2.6"/><circle cx="16.4" cy="2.6" r="2.6"/><circle cx="2.6" cy="9.5" r="2.6"/><circle cx="9.5" cy="9.5" r="2.6"/><circle cx="16.4" cy="9.5" r="2.6"/><circle cx="2.6" cy="16.4" r="2.6"/><circle cx="9.5" cy="16.4" r="2.6"/><circle cx="16.4" cy="16.4" r="2.6"/></svg>
-        <span class="t hdr-name" style="left:1486.86px;top:21.66px">Comcate Support</span>
-        <svg class="hdr-icon" style="left:1587px;top:26.5px" width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg>
+        <button type="button" class="t hdr-name hdr-btn hdr-account" style="left:1486.86px;top:21.66px" data-menu-toggle="account" aria-haspopup="true" aria-expanded="false">Comcate Support<svg style="left:99.94px;top:4.56px" width="8" height="6" viewBox="0 0 8 6" fill="none" aria-hidden="true"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg></button>
       </header>
 
       <div class="app-subbar" style="top:60px">
@@ -676,59 +692,46 @@
     </div>
   </template>
 
-  <div class="stage" id="stage">
-
-    <!-- 1. Dashboard (flow start) -->
-    <section class="screen" data-screen="dashboard" aria-label="Dashboard">
-      <div data-include="tpl-dashboard"></div>
-      <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
-      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
-    </section>
-
-    <!-- 2. Plus menu with "Just text a photo" promo -->
-    <section class="screen" data-screen="promo" aria-label="Create menu with promo">
-      <div data-include="tpl-dashboard"></div>
-      <div class="menu-card" style="left:1302.5px;top:56px;width:236px;height:219.5px"></div>
-      <div class="menu-caret" style="left:1412.5px;top:48px"></div>
-      <span class="t menu-heading" style="left:1314.33px;top:71.26px">Customer Submission</span>
-      <div class="layer promo-card">
+  <!-- Create + account menus, added to each page. Coordinates are for the dashboard header. -->
+  <template id="tpl-menus">
+    <div class="menu create-menu" data-menu="create" aria-label="Create menu">
+      <div class="menu-card promo-shell" style="left:1302.5px;top:56px;width:236px;height:219.5px"></div>
+      <div class="menu-caret promo-shell" style="left:1412.5px;top:48px"></div>
+      <span class="t menu-heading promo-shell" style="left:1314.33px;top:71.26px">Customer Submission</span>
+      <div class="menu-card plain-shell" style="left:1300.5px;top:56px;width:235.5px;height:41px"></div>
+      <div class="menu-caret plain-shell" style="left:1410.5px;top:48px"></div>
+      <span class="t menu-heading plain-shell" style="left:1312.33px;top:71.26px">Customer Submission</span>
+      <div class="layer promo-card promo-shell">
         <div class="copy">
           <div class="title-row">
             <h3>Just text a photo to report an issue.</h3>
-            <button class="popover-close" data-go="plus-menu" aria-label="Dismiss">
+            <button type="button" class="popover-close" data-action="dismiss-promo" aria-label="Dismiss">
               <img src="assets/icon-x.svg" alt="" width="24" height="24">
             </button>
           </div>
           <p>Simply register your phone number to get started.</p>
         </div>
-        <button class="btn-primary popover-cta" data-go="profile">Get Started</button>
+        <button type="button" class="btn-primary popover-cta" data-go="profile">Get Started</button>
       </div>
-      <button class="hotspot plus" data-go="dashboard" aria-label="Close create menu"></button>
-      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
-    </section>
-
-    <!-- 3. Plus menu after promo dismissed -->
-    <section class="screen" data-screen="plus-menu" aria-label="Create menu">
-      <div data-include="tpl-dashboard"></div>
-      <div class="menu-card" style="left:1300.5px;top:56px;width:235.5px;height:41px"></div>
-      <div class="menu-caret" style="left:1410.5px;top:48px"></div>
-      <span class="t menu-heading" style="left:1312.33px;top:71.26px">Customer Submission</span>
-      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
-    </section>
-
-    <!-- 4. Account menu -->
-    <section class="screen" data-screen="account" aria-label="Account menu">
-      <div data-include="tpl-dashboard"></div>
+    </div>
+    <div class="menu account-menu" data-menu="account" aria-label="Account menu">
       <div class="menu-card account-menu-card" style="left:1450.8px;top:39.3px;width:136.3px;height:81.1px"></div>
-      <span class="t menu-item" style="left:1458.64px;top:46.65px">My Profile</span>
+      <button type="button" class="t menu-item menu-link" style="left:1458.64px;top:46.65px" data-go="profile">My Profile</button>
       <span class="t menu-item" style="left:1458.64px;top:73.66px">Delegate Work</span>
       <span class="pill-off">OFF</span>
       <span class="t menu-item" style="left:1458.64px;top:101.04px">Logout</span>
-      <button class="hotspot account" data-go="dashboard" aria-label="Close account menu"></button>
-      <button class="hotspot my-profile" data-go="profile" aria-label="My Profile"></button>
+    </div>
+  </template>
+
+  <div class="stage" id="stage">
+
+    <!-- 1. Dashboard (flow start) -->
+    <section class="screen" data-screen="dashboard" aria-label="Dashboard">
+      <div data-include="tpl-dashboard"></div>
+      <div class="menu-anchor"><div data-include="tpl-menus"></div></div>
     </section>
 
-    <!-- 5. My Profile with phone registration -->
+    <!-- 2. My Profile with phone registration -->
     <section class="screen" data-screen="profile" aria-label="My Profile">
       <div class="profile-page">
         <div class="profile-top">
@@ -738,11 +741,10 @@
             <span class="t nav-item" style="left:279.92px;top:26px">Reports</span>
             <span class="t nav-item" style="left:358.86px;top:25.7px">Customer Submissions</span>
             <span class="t nav-item" style="left:520.03px;top:25.7px">Action Center</span>
-            <svg class="hdr-icon" style="left:1419.5px;top:20px" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg>
+            <button type="button" class="hdr-btn hdr-plus" style="left:1419.5px;top:20px" data-menu-toggle="create" aria-label="Create" aria-haspopup="true" aria-expanded="false"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11.75" fill="#fff"/><path d="M12 6.25v11.5M6.25 12h11.5" stroke="#045a90" stroke-width="1.5"/></svg></button>
             <div class="hdr-divider" style="left:1455.5px;top:20px"></div>
             <svg class="hdr-icon" style="left:1466.5px;top:22.5px" width="19" height="19" viewBox="0 0 19 19" fill="#fff"><circle cx="2.6" cy="2.6" r="2.6"/><circle cx="9.5" cy="2.6" r="2.6"/><circle cx="16.4" cy="2.6" r="2.6"/><circle cx="2.6" cy="9.5" r="2.6"/><circle cx="9.5" cy="9.5" r="2.6"/><circle cx="16.4" cy="9.5" r="2.6"/><circle cx="2.6" cy="16.4" r="2.6"/><circle cx="9.5" cy="16.4" r="2.6"/><circle cx="16.4" cy="16.4" r="2.6"/></svg>
-            <span class="t hdr-name" style="left:1495.53px;top:25.5px">Amy Hopson</span>
-            <svg class="hdr-icon" style="left:1588px;top:30.5px" width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg>
+            <button type="button" class="t hdr-name hdr-btn hdr-account" style="left:1495.53px;top:25.5px" data-menu-toggle="account" aria-haspopup="true" aria-expanded="false">Amy Hopson<svg style="left:92.27px;top:4.72px" width="8" height="6" viewBox="0 0 8 6" fill="none" aria-hidden="true"><path d="M0.5 0.8L4 4.8 7.5 0.8" stroke="#c8c8c8" stroke-width="1.1"/></svg></button>
           </header>
           <div class="app-subbar" style="top:64px">
             <h1 class="t page-title" style="left:23.67px;top:25.49px">My Profile</h1>
@@ -851,9 +853,10 @@
             </div>
           </section>
         </div>
+
+        <!-- Inside the page so the menus scroll with the header -->
+        <div class="menu-anchor" style="--create-dx:13.5px;--create-dy:4px;--account-dx:8.67px;--account-dy:3.84px"><div data-include="tpl-menus"></div></div>
       </div>
-      <button class="hotspot plus" data-go="promo" aria-label="Open create menu"></button>
-      <button class="hotspot account" data-go="account" aria-label="Open account menu"></button>
     </section>
 
     <div class="toast" id="toast" role="status" aria-live="polite">
@@ -867,6 +870,9 @@
   const screens = [...stage.querySelectorAll('.screen')];
   const START = 'dashboard';
 
+  let openMenu = null;         // 'create' | 'account' | null
+  let promoDismissed = false;  // the create menu's promo stays hidden once dismissed
+
   document.querySelectorAll('[data-include]').forEach(slot => {
     slot.replaceWith(document.getElementById(slot.dataset.include).content.cloneNode(true));
   });
@@ -875,6 +881,7 @@
     const target = screens.find(s => s.dataset.screen === name) || screens[0];
     if (!target.classList.contains('active')) target.scrollTop = 0;
     screens.forEach(s => s.classList.toggle('active', s === target));
+    setMenu(null);
     if (push && location.hash.slice(1) !== target.dataset.screen) {
       history.pushState(null, '', '#' + target.dataset.screen);
     }
@@ -886,11 +893,32 @@
     stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
   }
 
+  /* ---------- Header menus ---------- */
+  function setMenu(name) {
+    openMenu = name;
+    const page = screens.find(s => s.classList.contains('active'));
+    document.querySelectorAll('.menu').forEach(m => {
+      m.classList.toggle('open', m.dataset.menu === name && page.contains(m));
+    });
+    document.querySelectorAll('[data-menu-toggle]').forEach(b => {
+      b.setAttribute('aria-expanded', String(b.dataset.menuToggle === name && page.contains(b)));
+    });
+  }
+
+  function renderPromo() {
+    document.querySelectorAll('.create-menu').forEach(m => m.classList.toggle('promo-dismissed', promoDismissed));
+  }
+
   let hintTimer;
   stage.addEventListener('click', e => {
+    const toggle = e.target.closest('[data-menu-toggle]');
+    if (toggle) { setMenu(openMenu === toggle.dataset.menuToggle ? null : toggle.dataset.menuToggle); return; }
+    if (e.target.closest('[data-action="dismiss-promo"]')) { promoDismissed = true; renderPromo(); return; }
     const link = e.target.closest('[data-go]');
     if (link) { show(link.dataset.go); return; }
-    // Clicked somewhere without an interaction: flash hotspots, like Figma
+    // Any click outside an open menu closes it
+    if (openMenu) { if (!e.target.closest('.menu.open')) setMenu(null); return; }
+    // Clicked somewhere without an interaction: flash what's clickable, like Figma
     if (e.target.closest('input, form, button, label')) return;
     stage.classList.add('hint');
     clearTimeout(hintTimer);
@@ -899,7 +927,13 @@
 
   // "R" restarts the flow, like Figma prototypes
   document.addEventListener('keydown', e => {
-    if ((e.key === 'r' || e.key === 'R') && !e.target.closest('input')) { resetProfile(); show(START); }
+    if (e.key === 'Escape' && openMenu) { setMenu(null); return; }
+    if ((e.key === 'r' || e.key === 'R') && !e.target.closest('input')) {
+      resetProfile();
+      promoDismissed = false;
+      renderPromo();
+      show(START);
+    }
   });
 
   /* ---------- Phone registration on the profile page ---------- */
