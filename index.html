@@ -215,7 +215,8 @@
   .stage.hint .hdr-btn,
   .stage.hint .menu.open .menu-link,
   .stage.hint .popover-close,
-  .stage.hint .popover-cta {
+  .stage.hint .popover-cta,
+  .stage.hint .top-banner button {
     box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
     background-color: rgba(24, 160, 251, 0.25);
   }
@@ -275,12 +276,31 @@
   .popover-cta { width: 100%; }
 
   /* ---------- My Profile + registration banner ---------- */
-  /* Profile content is taller than the stage, so it scrolls */
-  .screen[data-screen="profile"] {
+  /* Pages can be taller than the stage (top banner, profile content), so they scroll */
+  .screen {
     overflow-y: auto;
     scrollbar-width: none;
   }
-  .screen[data-screen="profile"]::-webkit-scrollbar { display: none; }
+  .screen::-webkit-scrollbar { display: none; }
+  .page-body { position: relative; height: 846px; }
+
+  /* ---------- Top banner: same callout as the create menu's promo ---------- */
+  .top-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 52px;
+    padding: 0 14px 0 24px;
+    background: var(--mint);
+    border-bottom: 1px solid rgba(86, 162, 123, 0.45);
+    font-family: "Inter", sans-serif;
+    color: #000;
+  }
+  .top-banner .icon { flex-shrink: 0; display: block; }
+  .top-banner p { margin: 0; font-size: 13px; line-height: normal; }
+  .top-banner p strong { font-weight: 700; margin-right: 4px; }
+  .top-banner .btn-primary { height: 32px; padding: 0 16px; font-size: 14px; }
+  .top-banner .icon-btn { margin-left: auto; }
 
   .profile-page {
     position: relative;
@@ -724,16 +744,32 @@
     </div>
   </template>
 
+  <!-- Top banner, added above the navigation on each page -->
+  <template id="tpl-banner">
+    <div class="top-banner" data-top-banner>
+      <svg class="icon" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="14" fill="#56a27b"/><path d="M8.5 10.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-4.2L10 20v-2.5h.5a2 2 0 0 1-2-2z" fill="#fff"/></svg>
+      <p><strong>Just text a photo to report an issue.</strong> Simply register your phone number to get started.</p>
+      <button type="button" class="btn-primary" data-go="profile">Get Started</button>
+      <button type="button" class="icon-btn" data-action="dismiss-promo" aria-label="Dismiss">
+        <img src="assets/icon-x.svg" alt="" width="24" height="24">
+      </button>
+    </div>
+  </template>
+
   <div class="stage" id="stage">
 
     <!-- 1. Dashboard (flow start) -->
     <section class="screen" data-screen="dashboard" aria-label="Dashboard">
-      <div data-include="tpl-dashboard"></div>
-      <div class="menu-anchor"><div data-include="tpl-menus"></div></div>
+      <div data-include="tpl-banner"></div>
+      <div class="page-body">
+        <div data-include="tpl-dashboard"></div>
+        <div class="menu-anchor"><div data-include="tpl-menus"></div></div>
+      </div>
     </section>
 
     <!-- 2. My Profile with phone registration -->
     <section class="screen" data-screen="profile" aria-label="My Profile">
+      <div data-include="tpl-banner"></div>
       <div class="profile-page">
         <div class="profile-top">
           <header class="app-header" style="height:64px">
@@ -906,10 +942,12 @@
     });
   }
 
-  // The promo only shows while no phone is registered, and never again once dismissed
+  // The promo (in the create menu and the top banner) only shows while no phone is
+  // registered, and never again once dismissed from either place
   function renderPromo() {
     const hidePromo = promoDismissed || !!profile.phone;
     document.querySelectorAll('.create-menu').forEach(m => m.classList.toggle('promo-dismissed', hidePromo));
+    document.querySelectorAll('[data-top-banner]').forEach(b => { b.hidden = hidePromo; });
   }
 
   let hintTimer;
