@@ -255,7 +255,8 @@
     border-radius: 50%;
     background: #fff;
   }
-  .promo-bar-copy { flex: 1; min-width: 0; }
+  /* Headline and subhead on one line */
+  .promo-bar-copy { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; }
   .promo-bar p { margin: 0; font-size: 14px; line-height: 1.4; }
   .promo-bar .promo-bar-title { font-weight: 700; }
   .promo-bar-link {
@@ -840,7 +841,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c5a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
           </div>
           <div>
-            <p class="cm-promo-title">Just text a photo to create a customer submission</p>
+            <p class="cm-promo-title">Just text a photo to create a customer submission.</p>
             <p>Register your phone number to get started.</p>
             <button type="button" class="cm-link" data-go="profile">Get started →</button>
           </div>
@@ -1002,7 +1003,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c5a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
             </div>
             <div class="promo-bar-copy">
-              <p class="promo-bar-title">Just text a photo to create a customer submission</p>
+              <p class="promo-bar-title">Just text a photo to create a customer submission.</p>
               <p>Register your phone number to get started.</p>
             </div>
             <button type="button" class="promo-bar-link" data-go="profile">Get started →</button>
