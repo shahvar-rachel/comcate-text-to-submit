@@ -224,10 +224,64 @@
     transition: opacity var(--transition), visibility 0s linear 300ms;
   }
   .modal-backdrop.open { opacity: 1; visibility: visible; transition: opacity var(--transition), visibility 0s; }
+  .modal-backdrop { overflow-y: auto; scrollbar-width: none; }
+  .modal-backdrop::-webkit-scrollbar { display: none; }
+  /* The screenshot is split below its header so the promo banner can sit in between.
+     Scaled 1338px -> 1287.5px (k = 0.96226); the header is the image's first 66 rows. */
   .create-modal { position: absolute; left: 162.25px; top: 18.5px; width: 1287.5px; }
-  .create-modal img { display: block; width: 100%; height: auto; }
+  .modal-shot { background: url("assets/create-submission.png") no-repeat; background-size: 1287.5px 828.5px; }
+  .modal-shot-top { height: 63.51px; background-position: 0 0; }
+  .modal-shot-rest { height: 765px; background-position: 0 -63.51px; }
+  .modal-promo-slot { padding: 11.55px 12.51px 0; background: #efefef; }
+
+  /* Horizontal version of the + menu promo */
+  .promo-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px 12px 16px;
+    border: 2px solid #56a27b;
+    border-radius: 10px;
+    background: var(--mint);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #181a22;
+  }
+  .promo-bar-icon {
+    flex: none;
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .promo-bar-copy { flex: 1; min-width: 0; }
+  .promo-bar p { margin: 0; font-size: 14px; line-height: 1.4; }
+  .promo-bar .promo-bar-title { font-weight: 700; }
+  .promo-bar-link {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c5a8a;
+    cursor: pointer;
+  }
+  .promo-bar-close {
+    flex: none;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    font-size: 16px;
+    line-height: 1;
+    color: #333;
+    cursor: pointer;
+  }
   .modal-hotspot { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; }
-  .stage.hint .modal-backdrop.open .modal-hotspot {
+  .stage.hint .modal-backdrop.open .modal-hotspot,
+  .stage.hint .modal-backdrop.open .promo-bar button {
     box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
     background-color: rgba(24, 160, 251, 0.25);
   }
@@ -941,9 +995,23 @@
 
     <div class="modal-backdrop" id="create-modal" role="dialog" aria-modal="true" aria-label="Create Customer Submission">
       <div class="create-modal">
-        <img src="assets/create-submission.png" alt="Create Customer Submission form" width="1338" height="861">
-        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:84.53%;top:2.09%;width:4.33%;height:3.48%" aria-label="Cancel"></button>
-        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:89.76%;top:2.09%;width:8.67%;height:3.48%" aria-label="Create Submission"></button>
+        <div class="modal-shot modal-shot-top" role="img" aria-label="Create Customer Submission"></div>
+        <div class="modal-promo-slot" data-promo-banner>
+          <div class="promo-bar">
+            <div class="promo-bar-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c5a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
+            </div>
+            <div class="promo-bar-copy">
+              <p class="promo-bar-title">Just text a photo to create a customer submission</p>
+              <p>Register your phone number to get started.</p>
+            </div>
+            <button type="button" class="promo-bar-link" data-go="profile">Get started →</button>
+            <button type="button" class="promo-bar-close" data-action="dismiss-promo" aria-label="Dismiss">×</button>
+          </div>
+        </div>
+        <div class="modal-shot modal-shot-rest" role="img" aria-label="Create Customer Submission form"></div>
+        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:84.53%;top:17.32px;width:4.33%;height:28.87px" aria-label="Cancel"></button>
+        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:89.76%;top:17.32px;width:8.67%;height:28.87px" aria-label="Create Submission"></button>
       </div>
     </div>
 
@@ -971,6 +1039,7 @@
     if (!target.classList.contains('active')) target.scrollTop = 0;
     screens.forEach(s => s.classList.toggle('active', s === target));
     setMenu(null);
+    createModal.classList.remove('open');
     if (push && location.hash.slice(1) !== target.dataset.screen) {
       history.pushState(null, '', '#' + target.dataset.screen);
     }
@@ -998,6 +1067,7 @@
   function renderPromo() {
     const hidePromo = promoDismissed || !!profile.phone;
     document.querySelectorAll('.create-menu').forEach(m => m.classList.toggle('promo-dismissed', hidePromo));
+    document.querySelectorAll('[data-promo-banner]').forEach(b => { b.hidden = hidePromo; });
   }
 
   let hintTimer;
@@ -1005,7 +1075,7 @@
     const toggle = e.target.closest('[data-menu-toggle]');
     if (toggle) { setMenu(openMenu === toggle.dataset.menuToggle ? null : toggle.dataset.menuToggle); return; }
     if (e.target.closest('[data-action="dismiss-promo"]')) { promoDismissed = true; renderPromo(); return; }
-    if (e.target.closest('[data-action="open-create-submission"]')) { setMenu(null); createModal.classList.add('open'); return; }
+    if (e.target.closest('[data-action="open-create-submission"]')) { setMenu(null); createModal.scrollTop = 0; createModal.classList.add('open'); return; }
     if (e.target.closest('[data-action="close-modal"]')) { createModal.classList.remove('open'); return; }
     const link = e.target.closest('[data-go]');
     if (link) { show(link.dataset.go); return; }
