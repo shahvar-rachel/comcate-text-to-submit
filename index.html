@@ -213,6 +213,25 @@
     background-color: rgba(24, 160, 251, 0.25);
   }
 
+  /* ---------- Create Customer Submission modal (a screenshot with clickable buttons) ---------- */
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition), visibility 0s linear 300ms;
+  }
+  .modal-backdrop.open { opacity: 1; visibility: visible; transition: opacity var(--transition), visibility 0s; }
+  .create-modal { position: absolute; left: 162.25px; top: 18.5px; width: 1287.5px; }
+  .create-modal img { display: block; width: 100%; height: auto; }
+  .modal-hotspot { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .stage.hint .modal-backdrop.open .modal-hotspot {
+    box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.9) inset;
+    background-color: rgba(24, 160, 251, 0.25);
+  }
+
   /* ---------- Create menu (opened by the + icon) ---------- */
   .create-panel {
     position: absolute;
@@ -756,7 +775,7 @@
           </span>
           <span><b>Code Enforcement Case</b></span><span class="cm-chev" aria-hidden="true">›</span>
         </button>
-        <button type="button" class="cm-act">
+        <button type="button" class="cm-act" data-action="open-create-submission">
           <span class="cm-act-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15h6"/></svg>
           </span>
@@ -920,6 +939,14 @@
       </div>
     </section>
 
+    <div class="modal-backdrop" id="create-modal" role="dialog" aria-modal="true" aria-label="Create Customer Submission">
+      <div class="create-modal">
+        <img src="assets/create-submission.png" alt="Create Customer Submission form" width="1338" height="861">
+        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:84.53%;top:2.09%;width:4.33%;height:3.48%" aria-label="Cancel"></button>
+        <button type="button" class="modal-hotspot" data-action="close-modal" style="left:89.76%;top:2.09%;width:8.67%;height:3.48%" aria-label="Create Submission"></button>
+      </div>
+    </div>
+
     <div class="toast" id="toast" role="status" aria-live="polite">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#56a27b"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span id="toast-text"></span>
@@ -931,6 +958,7 @@
   const screens = [...stage.querySelectorAll('.screen')];
   const START = 'dashboard';
 
+  const createModal = document.getElementById('create-modal');
   let openMenu = null;         // 'create' | 'account' | null
   let promoDismissed = false;  // the create menu's promo stays hidden once dismissed
 
@@ -977,6 +1005,8 @@
     const toggle = e.target.closest('[data-menu-toggle]');
     if (toggle) { setMenu(openMenu === toggle.dataset.menuToggle ? null : toggle.dataset.menuToggle); return; }
     if (e.target.closest('[data-action="dismiss-promo"]')) { promoDismissed = true; renderPromo(); return; }
+    if (e.target.closest('[data-action="open-create-submission"]')) { setMenu(null); createModal.classList.add('open'); return; }
+    if (e.target.closest('[data-action="close-modal"]')) { createModal.classList.remove('open'); return; }
     const link = e.target.closest('[data-go]');
     if (link) { show(link.dataset.go); return; }
     // Any click outside an open menu closes it
@@ -990,6 +1020,7 @@
 
   // "R" restarts the flow, like Figma prototypes
   document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && createModal.classList.contains('open')) { createModal.classList.remove('open'); return; }
     if (e.key === 'Escape' && openMenu) { setMenu(null); return; }
     if ((e.key === 'r' || e.key === 'R') && !e.target.closest('input')) {
       resetProfile();
