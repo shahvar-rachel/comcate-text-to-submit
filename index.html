@@ -674,6 +674,8 @@
     padding: 12px 20px 20px;
   }
   .info-tile-main { flex: none; min-width: 240px; }
+  .header-kv { display: flex; align-items: center; gap: 8px; margin: 0; }
+  .header-kv dd { margin: 0; }
 
   /* QR code (placeholder) that saves the agency number to the phone's contacts */
   .qr-col { flex: none; }
@@ -939,17 +941,18 @@
           <header class="info-tile-head">
             <h2 id="text-tile-title" tabindex="-1">Text to create customer submission</h2>
             <div class="info-tile-actions">
+              <dl class="kv header-kv" id="phone-kv">
+                <dt>Registered Phone Number:</dt>
+                <dd><span data-phone></span><span class="phone-status" id="phone-status"></span></dd>
+              </dl>
               <button class="btn-secondary" id="change-phone">Change phone number</button>
               <button class="btn-secondary" id="cancel-change" hidden>Cancel</button>
             </div>
           </header>
           <div class="info-tile-body">
             <!-- "How it works" is cloned in here (first) from the registration banner -->
-            <div class="info-tile-main">
-              <dl class="kv" id="phone-kv">
-                <dt>Registered Phone Number</dt>
-                <dd><span data-phone></span><span class="phone-status" id="phone-status"></span></dd>
-              </dl>
+            <!-- Only shown while changing the number -->
+            <div class="info-tile-main" id="change-col" hidden>
               <form class="phone-form" id="change-form" novalidate hidden>
                 <div class="phone-form-row">
                   <input id="change-input" type="tel" aria-label="New phone number" inputmode="tel" maxlength="20" placeholder="Enter Cell Number" autocomplete="tel" aria-describedby="change-error">
@@ -957,6 +960,13 @@
                 </div>
                 <p class="phone-error" id="change-error" aria-live="polite"></p>
               </form>
+            </div>
+            <div class="qr-col">
+              <p class="kv-label">Save your agency's number</p>
+              <figure class="contact-qr">
+                <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
+                <p>Scan with your phone camera to save this number to your contacts.</p>
+              </figure>
             </div>
             <div class="agency-col">
               <dl class="kv">
@@ -969,13 +979,6 @@
                 </dd>
               </dl>
               <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
-            </div>
-            <div class="qr-col">
-              <p class="kv-label">Save your agency's number</p>
-              <figure class="contact-qr">
-                <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
-                <p>Scan with your phone camera to save this number to your contacts.</p>
-              </figure>
             </div>
             
           </div>
@@ -1214,7 +1217,7 @@
     registerBanner.hidden = !!phone;
     successBanner.hidden = !phone || bannerDismissed;
     tile.hidden = !phone;
-    phoneKv.hidden = editing;
+    document.getElementById('change-col').hidden = !editing;
     changeForm.hidden = !editing;
     changeBtn.hidden = editing;
     cancelBtn.hidden = !editing;
