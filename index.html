@@ -403,14 +403,17 @@
   /* ---------- My Profile + registration banner ---------- */
   /* Profile content is taller than the stage, so it scrolls */
   .screen[data-screen="profile"],
-  .screen[data-screen="submissions"] {
+  .screen[data-screen="submissions"],
+  .screen[data-screen="submission-detail"] {
     overflow-y: auto;
     scrollbar-width: none;
   }
   .screen[data-screen="profile"]::-webkit-scrollbar,
-  .screen[data-screen="submissions"]::-webkit-scrollbar { display: none; }
+  .screen[data-screen="submissions"]::-webkit-scrollbar,
+  .screen[data-screen="submission-detail"]::-webkit-scrollbar { display: none; }
   .shot-page { position: relative; }
   .shot-page img { display: block; width: 1612px; height: auto; }
+  .shot-click { cursor: pointer; }
 
   .profile-page {
     position: relative;
@@ -884,11 +887,18 @@
     <!-- Customer Submissions list (screenshot) -->
     <section class="screen" data-screen="submissions" aria-label="Customer Submissions">
       <div class="shot-page">
-        <img src="assets/customer-submissions.webp" alt="Customer Submissions list" width="1612" height="989">
+        <img class="shot-click" src="assets/customer-submissions.webp" alt="Customer Submissions list" width="1612" height="989" data-go="submission-detail">
         <button type="button" class="hdr-btn" style="left:205px;top:0;width:92px;height:75px" data-go="dashboard" aria-label="Dashboard"></button>
         <button type="button" class="hdr-btn" style="left:1356px;top:22px;width:30px;height:30px;border-radius:50%" data-menu-toggle="create" aria-label="Create" aria-haspopup="true" aria-expanded="false"></button>
         <button type="button" class="hdr-btn" style="left:1450px;top:24px;width:132px;height:28px" data-menu-toggle="account" aria-haspopup="true" aria-expanded="false" aria-label="Comcate Support"></button>
         <div class="menu-anchor" style="--create-dx:-47px;--create-dy:9px;--account-dx:-35px;--account-dy:10px"><div data-include="tpl-menus"></div></div>
+      </div>
+    </section>
+
+    <!-- Customer Submission detail (screenshot) -->
+    <section class="screen" data-screen="submission-detail" aria-label="Customer Submission 26-61">
+      <div class="shot-page">
+        <img class="shot-click" src="assets/submission-detail.webp" alt="Customer Submission #26-61" width="1612" height="999" data-go="submissions">
       </div>
     </section>
 
@@ -1118,6 +1128,7 @@
     if (e.target.closest('[data-action="open-create-submission"]')) { setMenu(null); createModal.scrollTop = 0; createModal.classList.add('open'); return; }
     if (e.target.closest('[data-action="close-modal"]')) { createModal.classList.remove('open'); return; }
     const link = e.target.closest('[data-go]');
+    if (link && openMenu && link.classList.contains('shot-click')) { setMenu(null); return; }
     if (link) { show(link.dataset.go); return; }
     // Any click outside an open menu closes it
     if (openMenu) { if (!e.target.closest('.menu.open')) setMenu(null); return; }
