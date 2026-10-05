@@ -682,7 +682,24 @@
   }
   .info-tile-main { flex: none; min-width: 240px; }
   .header-kv { display: flex; align-items: center; gap: 8px; margin: 0; }
-  .header-kv dd { margin: 0; }
+  .kv.header-kv dd { display: flex; align-items: center; margin: 0; }
+
+  /* Change-number form lives in the tile header, replacing the registered number */
+  .header-form { position: relative; }
+  .header-form .phone-form-row { align-items: center; }
+  .header-form input { width: 220px; height: 32px; }
+  .header-form .btn-primary { height: 32px; padding: 0 14px; }
+  .header-form .phone-error {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+  }
 
   /* QR code (placeholder) that saves the agency number to the phone's contacts */
   .qr-col { flex: none; }
@@ -971,21 +988,18 @@
                 <dd><span data-phone></span><span class="phone-status" id="phone-status"></span></dd>
               </dl>
               <button class="btn-secondary" id="change-phone">Change phone number</button>
-              <button class="btn-secondary" id="cancel-change" hidden>Cancel</button>
-            </div>
-          </header>
-          <div class="info-tile-body">
-            <!-- "How it works" is cloned in here (first) from the registration banner -->
-            <!-- Only shown while changing the number -->
-            <div class="info-tile-main" id="change-col" hidden>
-              <form class="phone-form" id="change-form" novalidate hidden>
+              <form class="phone-form header-form" id="change-form" novalidate hidden>
                 <div class="phone-form-row">
                   <input id="change-input" type="tel" aria-label="New phone number" inputmode="tel" maxlength="20" placeholder="Enter Cell Number" autocomplete="tel" aria-describedby="change-error">
                   <button type="submit" class="btn-primary">Register my phone number</button>
                 </div>
                 <p class="phone-error" id="change-error" aria-live="polite"></p>
               </form>
+              <button class="btn-secondary" id="cancel-change" hidden>Cancel</button>
             </div>
+          </header>
+          <div class="info-tile-body">
+            <!-- "How it works" is cloned in here (first) from the registration banner -->
             <div class="qr-col">
               <p class="kv-label">Save your agency's number</p>
               <figure class="contact-qr">
@@ -1243,7 +1257,7 @@
     registerBanner.hidden = !!phone;
     successBanner.hidden = !phone || bannerDismissed;
     tile.hidden = !phone;
-    document.getElementById('change-col').hidden = !editing;
+    phoneKv.hidden = editing;
     changeForm.hidden = !editing;
     changeBtn.hidden = editing;
     cancelBtn.hidden = !editing;
