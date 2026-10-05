@@ -550,6 +550,7 @@
   .success-banner h2:focus { outline: none; }
   .success-banner p { margin: 4px 0 0; font-size: 12px; line-height: normal; color: var(--gray-text); }
   .success-banner p strong { font-weight: 600; color: var(--ink); }
+  .success-banner .link-btn + .link-btn { margin-left: 12px; }
   .link-btn {
     margin-left: 4px;
     padding: 0;
@@ -679,6 +680,17 @@
     padding: 12px 20px 20px;
   }
   .info-tile-main { flex: 1; min-width: 0; }
+
+  /* QR code (placeholder) that saves the agency number to the phone's contacts */
+  .contact-qr { flex: none; width: 128px; font-family: "Source Sans 3", sans-serif; }
+  .contact-qr svg { display: block; width: 104px; height: 104px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; background: #fff; box-sizing: content-box; }
+  .contact-qr p { margin: 8px 0 0; font-size: 11px; line-height: 14px; color: var(--app-value); }
+
+  /* Verification status next to the registered number */
+  .phone-status { display: inline-flex; align-items: center; gap: 5px; margin-left: 12px; font-weight: 600; }
+  .phone-status.is-pending { color: #d9730d; }
+  .phone-status.is-pending::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .phone-status.is-verified { color: #2e7d4f; }
   .kv { margin: 0; }
   .kv dt {
     display: block;
@@ -913,12 +925,13 @@
 
         <!-- After registration -->
         <div class="success-banner" id="success-banner" hidden>
-          <svg class="icon" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#56a27b"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div class="msg">
-            <h2 tabindex="-1">Phone number registered</h2>
-            <p aria-live="polite">
-              <span id="success-copy"></span>
+          <svg class="icon" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="14" fill="#56a27b"/><path d="M8.5 10.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-4.2L10 20v-2.5h.5a2 2 0 0 1-2-2z" fill="#fff"/></svg>
+          <div class="msg" aria-live="polite">
+            <h2 tabindex="-1" id="success-title"></h2>
+            <p>
+              <span>Reply YES to finish setup.</span>
               <button type="button" class="link-btn" id="resend-text">Resend text</button>
+              <button type="button" class="link-btn" id="banner-change-number">Change number</button>
             </p>
           </div>
           <button class="icon-btn" id="dismiss-success" aria-label="Dismiss message">
@@ -943,10 +956,14 @@
           </header>
           <div class="info-tile-body">
             <!-- "How it works" is cloned in here (first) from the registration banner -->
+            <figure class="contact-qr" style="margin:0">
+              <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
+              <p>Scan with your phone camera to save this number to your contacts.</p>
+            </figure>
             <div class="info-tile-main">
               <dl class="kv" id="phone-kv">
                 <dt>Registered Phone Number</dt>
-                <dd data-phone></dd>
+                <dd><span data-phone></span><span class="phone-status" id="phone-status"></span></dd>
               </dl>
               <form class="phone-form" id="change-form" novalidate hidden>
                 <div class="phone-form-row">
@@ -1114,10 +1131,38 @@
 
   tile.querySelector('.info-tile-body').prepend(registerBanner.querySelector('.how-it-works').cloneNode(true));
 
-  const successCopy = document.getElementById('success-copy');
+  const successTitle = document.getElementById('success-title');
   const resendBtn = document.getElementById('resend-text');
+  const phoneStatus = document.getElementById('phone-status');
 
-  let profile = { phone: null, bannerDismissed: false, editing: false, resent: false };
+  // verified: they've replied YES. The prototype fakes this: a number saved before a
+  // page refresh comes back as verified.
+  const BLANK_PROFILE = { phone: null, bannerDismissed: false, editing: false, resent: false, verified: false };
+  const STORE_KEY = 'tts-registered-phone';
+  const TAKEN_NUMBER = '(555) 555-5555';
+  let profile = { ...BLANK_PROFILE };
+  try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) profile = { ...BLANK_PROFILE, phone: saved, bannerDismissed: true, verified: true };
+  } catch {}
+
+  function savePhone(phone) {
+    try { phone ? localStorage.setItem(STORE_KEY, phone) : localStorage.removeItem(STORE_KEY); } catch {}
+  }
+
+  // Placeholder QR code: real-looking finder squares, pseudo-random modules
+  (function drawFakeQr() {
+    const size = 25, cells = [];
+    const finder = (x, y) => cells.push(`<path d="M${x} ${y}h7v7h-7zM${x + 1} ${y + 1}v5h5v-5zM${x + 2} ${y + 2}h3v3h-3z" fill-rule="evenodd"/>`);
+    const inFinder = (x, y) => (x < 8 && y < 8) || (x >= size - 8 && y < 8) || (x < 8 && y >= size - 8);
+    let seed = 7;
+    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      if (!inFinder(x, y) && rand() < 0.48) cells.push(`<rect x="${x}" y="${y}" width="1" height="1"/>`);
+    }
+    finder(0, 0); finder(size - 7, 0); finder(0, size - 7);
+    document.getElementById('contact-qr-code').innerHTML = `<g fill="#1b1b1f">${cells.join('')}</g>`;
+  })();
 
   // Accepts US numbers in common formats: 5551234567, 555-123-4567, (555) 123-4567,
   // 555.123.4567, +1 555 123 4567, 1-555-123-4567
@@ -1138,10 +1183,16 @@
   }
 
   function renderSuccessCopy() {
-    const phone = '<strong>' + (profile.phone || '') + '</strong>';
-    successCopy.innerHTML = profile.resent
-      ? 'We sent another text to ' + phone + '. It can take a minute to arrive. Save that number to your contacts, then text it a photo anytime to create a submission.'
-      : 'We just sent a text to ' + phone + '. Save that number to your contacts, then text it a photo anytime to create a submission.';
+    successTitle.textContent = profile.resent
+      ? `We sent another text to ${profile.phone || ''}.`
+      : `We just texted ${profile.phone || ''}.`;
+  }
+
+  function renderStatus() {
+    phoneStatus.className = 'phone-status ' + (profile.verified ? 'is-verified' : 'is-pending');
+    phoneStatus.innerHTML = profile.verified
+      ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6.3l2.6 2.6L10 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Registered'
+      : 'Waiting for reply';
   }
 
   function render() {
@@ -1155,6 +1206,7 @@
     changeBtn.hidden = editing;
     cancelBtn.hidden = !editing;
     document.querySelectorAll('[data-phone]').forEach(el => { el.textContent = phone || ''; });
+    renderStatus();
     renderPromo();
   }
 
@@ -1164,7 +1216,8 @@
   }
 
   function resetProfile() {
-    profile = { phone: null, bannerDismissed: false, editing: false, resent: false };
+    profile = { ...BLANK_PROFILE };
+    savePhone(null);
     forms.forEach(resetForm);
     render();
   }
@@ -1194,8 +1247,14 @@
         input.focus();
         return;
       }
+      if (phone === TAKEN_NUMBER) {
+        setError(form, 'This number is already registered to another user. Contact your admin.');
+        input.focus();
+        return;
+      }
       resetForm(form);
-      profile = { phone, bannerDismissed: false, editing: false, resent: false };
+      profile = { ...BLANK_PROFILE, phone };
+      savePhone(phone);
       render();
       successBanner.querySelector('h2').focus();
     });
@@ -1249,11 +1308,13 @@
     document.getElementById('text-tile-title').focus();
   });
 
-  changeBtn.addEventListener('click', () => {
+  function startChangeNumber() {
     profile.editing = true;
     render();
     changeForm.querySelector('input').focus();
-  });
+  }
+  changeBtn.addEventListener('click', startChangeNumber);
+  document.getElementById('banner-change-number').addEventListener('click', startChangeNumber);
 
   cancelBtn.addEventListener('click', () => {
     profile.editing = false;
@@ -1265,6 +1326,7 @@
   window.addEventListener('popstate', () => show(location.hash.slice(1) || START, { push: false }));
   window.addEventListener('resize', fit);
   fit();
+  render();
   show(location.hash.slice(1) || START, { push: false });
 </script>
 </body>
