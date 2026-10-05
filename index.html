@@ -621,7 +621,7 @@
     gap: 24px;
   }
   /* Agency number column: same key/value style as the registered number */
-  .agency-col { flex: none; }
+  .agency-col { flex: none; min-width: 220px; }
   .agency-value { display: flex; align-items: center; gap: 4px; height: 14px; }
   .copy-btn {
     width: 20px; height: 20px;
@@ -641,7 +641,7 @@
     font-size: 12px;
     color: var(--app-link);
   }
-  .agency-col .link-btn { display: block; margin: 8px 0 14px; }
+  .agency-col .link-btn { display: block; margin: 8px 0 0; }
   .info-tile .link-btn:hover { color: #03446d; }
 
   /* ---------- Toast ---------- */
@@ -673,9 +673,11 @@
     align-items: flex-start;
     padding: 12px 20px 20px;
   }
-  .info-tile-main { flex: 1; min-width: 0; }
+  .info-tile-main { flex: none; min-width: 240px; }
 
   /* QR code (placeholder) that saves the agency number to the phone's contacts */
+  .qr-col { flex: none; }
+  .qr-col .kv-label { margin-bottom: 6px; }
   .contact-qr { width: 128px; margin: 0; font-family: "Source Sans 3", sans-serif; }
   .contact-qr svg { display: block; width: 104px; height: 104px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; background: #fff; box-sizing: content-box; }
   .contact-qr p { margin: 8px 0 0; font-size: 11px; line-height: 14px; color: var(--app-value); }
@@ -686,7 +688,8 @@
   .phone-status.is-pending::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
   .phone-status.is-verified { color: #2e7d4f; }
   .kv { margin: 0; }
-  .kv dt {
+  .kv dt,
+  .kv-label {
     display: block;
     margin: 0;
     font-size: 11.3px;
@@ -942,22 +945,6 @@
           </header>
           <div class="info-tile-body">
             <!-- "How it works" is cloned in here (first) from the registration banner -->
-            <div class="agency-col">
-              <dl class="kv">
-                <dt>Your agency's text number</dt>
-                <dd class="agency-value">
-                  <span id="agency-number">(909) 555-0142</span>
-                  <button type="button" class="copy-btn" id="copy-agency-number" aria-label="Copy agency text number">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                  </button>
-                </dd>
-              </dl>
-              <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
-              <figure class="contact-qr">
-                <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
-                <p>Scan with your phone camera to save this number to your contacts.</p>
-              </figure>
-            </div>
             <div class="info-tile-main">
               <dl class="kv" id="phone-kv">
                 <dt>Registered Phone Number</dt>
@@ -970,6 +957,25 @@
                 </div>
                 <p class="phone-error" id="change-error" aria-live="polite"></p>
               </form>
+            </div>
+            <div class="agency-col">
+              <dl class="kv">
+                <dt>Your agency's text number</dt>
+                <dd class="agency-value">
+                  <span id="agency-number">(909) 555-0142</span>
+                  <button type="button" class="copy-btn" id="copy-agency-number" aria-label="Copy agency text number">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </button>
+                </dd>
+              </dl>
+              <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
+            </div>
+            <div class="qr-col">
+              <p class="kv-label">Save your agency's number</p>
+              <figure class="contact-qr">
+                <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
+                <p>Scan with your phone camera to save this number to your contacts.</p>
+              </figure>
             </div>
             
           </div>
