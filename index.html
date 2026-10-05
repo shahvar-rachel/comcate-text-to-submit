@@ -546,11 +546,10 @@
   }
   .success-banner .icon { flex-shrink: 0; display: block; }
   .success-banner .msg { flex: 1; min-width: 0; }
-  .success-banner h2 { margin: 0; font-size: 14px; font-weight: 700; line-height: normal; }
-  .success-banner h2:focus { outline: none; }
-  .success-banner p { margin: 4px 0 0; font-size: 12px; line-height: normal; color: var(--gray-text); }
-  .success-banner p strong { font-weight: 600; color: var(--ink); }
-  .success-banner .link-btn + .link-btn { margin-left: 12px; }
+  .success-line { margin: 0; font-size: 14px; line-height: normal; color: var(--ink); }
+  .success-line strong { font-weight: 700; }
+  .success-line strong:focus { outline: none; }
+  .success-line .link-btn { margin-left: 8px; }
   .link-btn {
     margin-left: 4px;
     padding: 0;
@@ -621,17 +620,12 @@
     align-items: center;
     gap: 24px;
   }
-  .agency-number {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--app-ink);
-    white-space: nowrap;
-  }
-  .agency-number strong { font-weight: 600; }
+  /* Agency number column: same key/value style as the registered number */
+  .agency-col { flex: none; }
+  .agency-value { display: flex; align-items: center; gap: 4px; height: 14px; }
   .copy-btn {
-    width: 24px; height: 24px;
+    width: 20px; height: 20px;
+    margin: -3px 0;
     display: grid;
     place-items: center;
     padding: 0;
@@ -644,10 +638,10 @@
   .copy-btn:hover { background: #f0f0f0; color: var(--app-ink); }
   .copy-btn:focus-visible { outline: 2px solid var(--app-link); outline-offset: 1px; }
   .info-tile .link-btn {
-    margin-left: 12px;
     font-size: 12px;
     color: var(--app-link);
   }
+  .agency-col .link-btn { display: block; margin: 8px 0 14px; }
   .info-tile .link-btn:hover { color: #03446d; }
 
   /* ---------- Toast ---------- */
@@ -682,7 +676,7 @@
   .info-tile-main { flex: 1; min-width: 0; }
 
   /* QR code (placeholder) that saves the agency number to the phone's contacts */
-  .contact-qr { flex: none; width: 128px; font-family: "Source Sans 3", sans-serif; }
+  .contact-qr { width: 128px; margin: 0; font-family: "Source Sans 3", sans-serif; }
   .contact-qr svg { display: block; width: 104px; height: 104px; padding: 6px; border: 1px solid var(--border); border-radius: 4px; background: #fff; box-sizing: content-box; }
   .contact-qr p { margin: 8px 0 0; font-size: 11px; line-height: 14px; color: var(--app-value); }
 
@@ -927,11 +921,10 @@
         <div class="success-banner" id="success-banner" hidden>
           <svg class="icon" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="14" fill="#56a27b"/><path d="M8.5 10.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-4.2L10 20v-2.5h.5a2 2 0 0 1-2-2z" fill="#fff"/></svg>
           <div class="msg" aria-live="polite">
-            <h2 tabindex="-1" id="success-title"></h2>
-            <p>
+            <p class="success-line">
+              <strong tabindex="-1" id="success-title"></strong>
               <span>Reply YES to finish setup.</span>
               <button type="button" class="link-btn" id="resend-text">Resend text</button>
-              <button type="button" class="link-btn" id="banner-change-number">Change number</button>
             </p>
           </div>
           <button class="icon-btn" id="dismiss-success" aria-label="Dismiss message">
@@ -943,23 +936,28 @@
           <header class="info-tile-head">
             <h2 id="text-tile-title" tabindex="-1">Text to create customer submission</h2>
             <div class="info-tile-actions">
-              <div class="agency-number">
-                <span>Your agency's text number: <strong id="agency-number">(909) 555-0142</strong></span>
-                <button type="button" class="copy-btn" id="copy-agency-number" aria-label="Copy agency text number">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                </button>
-                <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
-              </div>
               <button class="btn-secondary" id="change-phone">Change phone number</button>
               <button class="btn-secondary" id="cancel-change" hidden>Cancel</button>
             </div>
           </header>
           <div class="info-tile-body">
             <!-- "How it works" is cloned in here (first) from the registration banner -->
-            <figure class="contact-qr" style="margin:0">
-              <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
-              <p>Scan with your phone camera to save this number to your contacts.</p>
-            </figure>
+            <div class="agency-col">
+              <dl class="kv">
+                <dt>Your agency's text number</dt>
+                <dd class="agency-value">
+                  <span id="agency-number">(909) 555-0142</span>
+                  <button type="button" class="copy-btn" id="copy-agency-number" aria-label="Copy agency text number">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </button>
+                </dd>
+              </dl>
+              <button type="button" class="link-btn" id="send-test-text">Send me a text from this number</button>
+              <figure class="contact-qr">
+                <svg id="contact-qr-code" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR code for the agency text number (placeholder)"></svg>
+                <p>Scan with your phone camera to save this number to your contacts.</p>
+              </figure>
+            </div>
             <div class="info-tile-main">
               <dl class="kv" id="phone-kv">
                 <dt>Registered Phone Number</dt>
@@ -1135,19 +1133,28 @@
   const resendBtn = document.getElementById('resend-text');
   const phoneStatus = document.getElementById('phone-status');
 
-  // verified: they've replied YES. The prototype fakes this: a number saved before a
-  // page refresh comes back as verified.
+  // verified: they've replied YES. The prototype fakes this with page refreshes:
+  // register -> refresh shows "Registered" -> refresh again starts fresh.
   const BLANK_PROFILE = { phone: null, bannerDismissed: false, editing: false, resent: false, verified: false };
   const STORE_KEY = 'tts-registered-phone';
   const TAKEN_NUMBER = '(555) 555-5555';
   let profile = { ...BLANK_PROFILE };
   try {
-    const saved = localStorage.getItem(STORE_KEY);
-    if (saved) profile = { ...BLANK_PROFILE, phone: saved, bannerDismissed: true, verified: true };
-  } catch {}
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (saved && saved.stage === 'pending') {
+      profile = { ...BLANK_PROFILE, phone: saved.phone, bannerDismissed: true, verified: true };
+      localStorage.setItem(STORE_KEY, JSON.stringify({ phone: saved.phone, stage: 'verified' }));
+    } else {
+      localStorage.removeItem(STORE_KEY);
+    }
+  } catch {
+    try { localStorage.removeItem(STORE_KEY); } catch {}
+  }
 
   function savePhone(phone) {
-    try { phone ? localStorage.setItem(STORE_KEY, phone) : localStorage.removeItem(STORE_KEY); } catch {}
+    try {
+      phone ? localStorage.setItem(STORE_KEY, JSON.stringify({ phone, stage: 'pending' })) : localStorage.removeItem(STORE_KEY);
+    } catch {}
   }
 
   // Placeholder QR code: real-looking finder squares, pseudo-random modules
@@ -1256,7 +1263,7 @@
       profile = { ...BLANK_PROFILE, phone };
       savePhone(phone);
       render();
-      successBanner.querySelector('h2').focus();
+      successTitle.focus();
     });
   });
 
@@ -1314,7 +1321,6 @@
     changeForm.querySelector('input').focus();
   }
   changeBtn.addEventListener('click', startChangeNumber);
-  document.getElementById('banner-change-number').addEventListener('click', startChangeNumber);
 
   cancelBtn.addEventListener('click', () => {
     profile.editing = false;
