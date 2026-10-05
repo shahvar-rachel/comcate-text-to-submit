@@ -686,6 +686,7 @@
 
   /* Change-number form lives in the tile header, replacing the registered number */
   .header-form { position: relative; }
+  .info-tile-actions.is-editing { gap: 8px; }
   .header-form .phone-form-row { align-items: center; }
   .header-form input { width: 220px; height: 32px; }
   .header-form .btn-primary { height: 32px; padding: 0 14px; }
@@ -1259,6 +1260,7 @@
     tile.hidden = !phone;
     phoneKv.hidden = editing;
     changeForm.hidden = !editing;
+    changeForm.parentElement.classList.toggle('is-editing', editing);
     changeBtn.hidden = editing;
     cancelBtn.hidden = !editing;
     document.querySelectorAll('[data-phone]').forEach(el => { el.textContent = phone || ''; });
