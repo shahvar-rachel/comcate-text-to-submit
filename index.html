@@ -877,7 +877,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c5a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
           </div>
           <div>
-            <p class="cm-promo-title">Just text a photo to create a customer submission.</p>
+            <p class="cm-promo-title">Just text a photo to create a submission.</p>
             <p>Register your phone number to get started.</p>
             <button type="button" class="cm-link" data-go="profile">Get started →</button>
           </div>
@@ -971,7 +971,7 @@
           <div class="msg" aria-live="polite">
             <p class="success-line">
               <strong tabindex="-1" id="success-title"></strong>
-              <span>Reply YES to finish setup.</span>
+              <span>Reply CONFIRM to finish setup.</span>
               <button type="button" class="link-btn" id="resend-text">Resend text</button>
             </p>
           </div>
@@ -1067,7 +1067,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c5a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>
             </div>
             <div class="promo-bar-copy">
-              <p class="promo-bar-title">Just text a photo to create a customer submission.</p>
+              <p class="promo-bar-title">Just text a photo to create a submission.</p>
               <p>Register your phone number to get started.</p>
             </div>
             <button type="button" class="promo-bar-link" data-go="profile">Get started →</button>
@@ -1183,7 +1183,7 @@
   const resendBtn = document.getElementById('resend-text');
   const phoneStatus = document.getElementById('phone-status');
 
-  // verified: they've replied YES. The prototype fakes this with page refreshes:
+  // verified: they've replied CONFIRM. The prototype fakes this with page refreshes:
   // register -> refresh shows "Registered" -> refresh again starts fresh.
   const BLANK_PROFILE = { phone: null, bannerDismissed: false, editing: false, resent: false, verified: false };
   const STORE_KEY = 'tts-registered-phone';
